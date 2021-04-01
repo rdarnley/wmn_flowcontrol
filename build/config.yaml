@@ -1,0 +1,6 @@
+
+numTimeSteps : 100
+numNodes : 10
+numControl : 5
+initValue : 30
+finalValue : 10
