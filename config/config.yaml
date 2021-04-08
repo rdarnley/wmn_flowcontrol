@@ -1,0 +1,6 @@
+numTimeSteps: 20
+numNodes: 5
+numControl: 5
+initValue: [15, 10]
+finalValue: [10, 10]
+experimentType: 1

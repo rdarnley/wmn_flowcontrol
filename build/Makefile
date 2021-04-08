@@ -123,6 +123,46 @@ wmn_sim/fast:
 	$(MAKE) -f CMakeFiles/wmn_sim.dir/build.make CMakeFiles/wmn_sim.dir/build
 .PHONY : wmn_sim/fast
 
+#=============================================================================
+# Target rules for targets named sim
+
+# Build rule for target.
+sim: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 sim
+.PHONY : sim
+
+# fast build rule for target.
+sim/fast:
+	$(MAKE) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/build
+.PHONY : sim/fast
+
+src/factor.o: src/factor.cpp.o
+
+.PHONY : src/factor.o
+
+# target to build an object file
+src/factor.cpp.o:
+	$(MAKE) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/factor.cpp.o
+.PHONY : src/factor.cpp.o
+
+src/factor.i: src/factor.cpp.i
+
+.PHONY : src/factor.i
+
+# target to preprocess a source file
+src/factor.cpp.i:
+	$(MAKE) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/factor.cpp.i
+.PHONY : src/factor.cpp.i
+
+src/factor.s: src/factor.cpp.s
+
+.PHONY : src/factor.s
+
+# target to generate assembly for a file
+src/factor.cpp.s:
+	$(MAKE) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/factor.cpp.s
+.PHONY : src/factor.cpp.s
+
 src/factors.o: src/factors.cpp.o
 
 .PHONY : src/factors.o
@@ -149,6 +189,60 @@ src/factors.s: src/factors.cpp.s
 src/factors.cpp.s:
 	$(MAKE) -f CMakeFiles/wmn_sim.dir/build.make CMakeFiles/wmn_sim.dir/src/factors.cpp.s
 .PHONY : src/factors.cpp.s
+
+src/sim.o: src/sim.cpp.o
+
+.PHONY : src/sim.o
+
+# target to build an object file
+src/sim.cpp.o:
+	$(MAKE) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/sim.cpp.o
+.PHONY : src/sim.cpp.o
+
+src/sim.i: src/sim.cpp.i
+
+.PHONY : src/sim.i
+
+# target to preprocess a source file
+src/sim.cpp.i:
+	$(MAKE) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/sim.cpp.i
+.PHONY : src/sim.cpp.i
+
+src/sim.s: src/sim.cpp.s
+
+.PHONY : src/sim.s
+
+# target to generate assembly for a file
+src/sim.cpp.s:
+	$(MAKE) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/sim.cpp.s
+.PHONY : src/sim.cpp.s
+
+src/solve.o: src/solve.cpp.o
+
+.PHONY : src/solve.o
+
+# target to build an object file
+src/solve.cpp.o:
+	$(MAKE) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/solve.cpp.o
+.PHONY : src/solve.cpp.o
+
+src/solve.i: src/solve.cpp.i
+
+.PHONY : src/solve.i
+
+# target to preprocess a source file
+src/solve.cpp.i:
+	$(MAKE) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/solve.cpp.i
+.PHONY : src/solve.cpp.i
+
+src/solve.s: src/solve.cpp.s
+
+.PHONY : src/solve.s
+
+# target to generate assembly for a file
+src/solve.cpp.s:
+	$(MAKE) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/solve.cpp.s
+.PHONY : src/solve.cpp.s
 
 src/solver.o: src/solver.cpp.o
 
@@ -211,11 +305,21 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... rebuild_cache"
-	@echo "... wmn_sim"
 	@echo "... edit_cache"
+	@echo "... wmn_sim"
+	@echo "... sim"
+	@echo "... src/factor.o"
+	@echo "... src/factor.i"
+	@echo "... src/factor.s"
 	@echo "... src/factors.o"
 	@echo "... src/factors.i"
 	@echo "... src/factors.s"
+	@echo "... src/sim.o"
+	@echo "... src/sim.i"
+	@echo "... src/sim.s"
+	@echo "... src/solve.o"
+	@echo "... src/solve.i"
+	@echo "... src/solve.s"
 	@echo "... src/solver.o"
 	@echo "... src/solver.i"
 	@echo "... src/solver.s"
