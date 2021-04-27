@@ -693,7 +693,8 @@ CMakeFiles/wmn_sim.dir/src/factors.cpp.o: /usr/local/lib/cmake/GTSAM/../../../in
 CMakeFiles/wmn_sim.dir/src/factors.cpp.o: /usr/local/lib/cmake/GTSAM/../../../include/gtsam/slam/dataset.h
 CMakeFiles/wmn_sim.dir/src/factors.cpp.o: /usr/local/lib/cmake/GTSAM/../../../include/gtsam_unstable/linear/LinearInequality.h
 
-CMakeFiles/wmn_sim.dir/src/solver.cpp.o: ../include/factors.h
+CMakeFiles/wmn_sim.dir/src/solver.cpp.o: ../include/centralized.h
+CMakeFiles/wmn_sim.dir/src/solver.cpp.o: ../include/factor.h
 CMakeFiles/wmn_sim.dir/src/solver.cpp.o: ../include/solver.h
 CMakeFiles/wmn_sim.dir/src/solver.cpp.o: ../src/solver.cpp
 CMakeFiles/wmn_sim.dir/src/solver.cpp.o: /usr/include/eigen3/Eigen/Cholesky
@@ -1373,6 +1374,7 @@ CMakeFiles/wmn_sim.dir/src/solver.cpp.o: /usr/local/lib/cmake/GTSAM/../../../inc
 CMakeFiles/wmn_sim.dir/src/solver.cpp.o: /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/ISAM2UpdateParams.h
 CMakeFiles/wmn_sim.dir/src/solver.cpp.o: /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/LevenbergMarquardtOptimizer.h
 CMakeFiles/wmn_sim.dir/src/solver.cpp.o: /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/LevenbergMarquardtParams.h
+CMakeFiles/wmn_sim.dir/src/solver.cpp.o: /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/Marginals.h
 CMakeFiles/wmn_sim.dir/src/solver.cpp.o: /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/NonlinearFactor.h
 CMakeFiles/wmn_sim.dir/src/solver.cpp.o: /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/NonlinearFactorGraph.h
 CMakeFiles/wmn_sim.dir/src/solver.cpp.o: /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/NonlinearOptimizer.h
@@ -1386,7 +1388,8 @@ CMakeFiles/wmn_sim.dir/src/solver.cpp.o: /usr/local/lib/cmake/GTSAM/../../../inc
 CMakeFiles/wmn_sim.dir/src/solver.cpp.o: /usr/local/lib/cmake/GTSAM/../../../include/gtsam/slam/dataset.h
 CMakeFiles/wmn_sim.dir/src/solver.cpp.o: /usr/local/lib/cmake/GTSAM/../../../include/gtsam_unstable/linear/LinearInequality.h
 
-CMakeFiles/wmn_sim.dir/src/wmn_sim.cpp.o: ../include/factors.h
+CMakeFiles/wmn_sim.dir/src/wmn_sim.cpp.o: ../include/centralized.h
+CMakeFiles/wmn_sim.dir/src/wmn_sim.cpp.o: ../include/factor.h
 CMakeFiles/wmn_sim.dir/src/wmn_sim.cpp.o: ../include/solver.h
 CMakeFiles/wmn_sim.dir/src/wmn_sim.cpp.o: ../src/wmn_sim.cpp
 CMakeFiles/wmn_sim.dir/src/wmn_sim.cpp.o: /usr/include/eigen3/Eigen/Cholesky
@@ -2066,6 +2069,7 @@ CMakeFiles/wmn_sim.dir/src/wmn_sim.cpp.o: /usr/local/lib/cmake/GTSAM/../../../in
 CMakeFiles/wmn_sim.dir/src/wmn_sim.cpp.o: /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/ISAM2UpdateParams.h
 CMakeFiles/wmn_sim.dir/src/wmn_sim.cpp.o: /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/LevenbergMarquardtOptimizer.h
 CMakeFiles/wmn_sim.dir/src/wmn_sim.cpp.o: /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/LevenbergMarquardtParams.h
+CMakeFiles/wmn_sim.dir/src/wmn_sim.cpp.o: /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/Marginals.h
 CMakeFiles/wmn_sim.dir/src/wmn_sim.cpp.o: /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/NonlinearFactor.h
 CMakeFiles/wmn_sim.dir/src/wmn_sim.cpp.o: /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/NonlinearFactorGraph.h
 CMakeFiles/wmn_sim.dir/src/wmn_sim.cpp.o: /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/NonlinearOptimizer.h

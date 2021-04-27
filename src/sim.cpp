@@ -34,7 +34,7 @@ class Simulator{
             solver.init(numTimeSteps, numNodes, numControl, initBuffer, initRate, finalBuffer, finalRate);
 
             // Call Factor Graph Solver
-            solver.FGSolve(2);
+            solver.FGSolve(0);
 
             // Call Factor Graph Sim Solver
             // solver.FGSim();

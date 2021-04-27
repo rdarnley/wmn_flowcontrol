@@ -60,76 +60,39 @@ CMAKE_SOURCE_DIR = /home/ryan/wmn_flowcontrol
 CMAKE_BINARY_DIR = /home/ryan/wmn_flowcontrol/build
 
 #=============================================================================
-# Target rules for target CMakeFiles/wmn_sim.dir
+# Target rules for target CMakeFiles/centralized.dir
 
 # All Build rule for target.
-CMakeFiles/wmn_sim.dir/all:
-	$(MAKE) -f CMakeFiles/wmn_sim.dir/build.make CMakeFiles/wmn_sim.dir/depend
-	$(MAKE) -f CMakeFiles/wmn_sim.dir/build.make CMakeFiles/wmn_sim.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ryan/wmn_flowcontrol/build/CMakeFiles --progress-num=5,6,7,8 "Built target wmn_sim"
-.PHONY : CMakeFiles/wmn_sim.dir/all
+CMakeFiles/centralized.dir/all:
+	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/depend
+	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ryan/wmn_flowcontrol/build/CMakeFiles --progress-num=1,2,3,4,5 "Built target centralized"
+.PHONY : CMakeFiles/centralized.dir/all
 
 # Include target in all.
-all: CMakeFiles/wmn_sim.dir/all
+all: CMakeFiles/centralized.dir/all
 
 .PHONY : all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/wmn_sim.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ryan/wmn_flowcontrol/build/CMakeFiles 4
-	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/wmn_sim.dir/all
+CMakeFiles/centralized.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ryan/wmn_flowcontrol/build/CMakeFiles 5
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/centralized.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/ryan/wmn_flowcontrol/build/CMakeFiles 0
-.PHONY : CMakeFiles/wmn_sim.dir/rule
+.PHONY : CMakeFiles/centralized.dir/rule
 
 # Convenience name for target.
-wmn_sim: CMakeFiles/wmn_sim.dir/rule
+centralized: CMakeFiles/centralized.dir/rule
 
-.PHONY : wmn_sim
-
-# clean rule for target.
-CMakeFiles/wmn_sim.dir/clean:
-	$(MAKE) -f CMakeFiles/wmn_sim.dir/build.make CMakeFiles/wmn_sim.dir/clean
-.PHONY : CMakeFiles/wmn_sim.dir/clean
+.PHONY : centralized
 
 # clean rule for target.
-clean: CMakeFiles/wmn_sim.dir/clean
-
-.PHONY : clean
-
-#=============================================================================
-# Target rules for target CMakeFiles/sim.dir
-
-# All Build rule for target.
-CMakeFiles/sim.dir/all:
-	$(MAKE) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/depend
-	$(MAKE) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ryan/wmn_flowcontrol/build/CMakeFiles --progress-num=1,2,3,4 "Built target sim"
-.PHONY : CMakeFiles/sim.dir/all
-
-# Include target in all.
-all: CMakeFiles/sim.dir/all
-
-.PHONY : all
-
-# Build rule for subdir invocation for target.
-CMakeFiles/sim.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ryan/wmn_flowcontrol/build/CMakeFiles 4
-	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/sim.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ryan/wmn_flowcontrol/build/CMakeFiles 0
-.PHONY : CMakeFiles/sim.dir/rule
-
-# Convenience name for target.
-sim: CMakeFiles/sim.dir/rule
-
-.PHONY : sim
+CMakeFiles/centralized.dir/clean:
+	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/clean
+.PHONY : CMakeFiles/centralized.dir/clean
 
 # clean rule for target.
-CMakeFiles/sim.dir/clean:
-	$(MAKE) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/clean
-.PHONY : CMakeFiles/sim.dir/clean
-
-# clean rule for target.
-clean: CMakeFiles/sim.dir/clean
+clean: CMakeFiles/centralized.dir/clean
 
 .PHONY : clean
 

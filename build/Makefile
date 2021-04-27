@@ -111,30 +111,71 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named wmn_sim
+# Target rules for targets named centralized
 
 # Build rule for target.
-wmn_sim: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 wmn_sim
-.PHONY : wmn_sim
+centralized: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 centralized
+.PHONY : centralized
 
 # fast build rule for target.
-wmn_sim/fast:
-	$(MAKE) -f CMakeFiles/wmn_sim.dir/build.make CMakeFiles/wmn_sim.dir/build
-.PHONY : wmn_sim/fast
+centralized/fast:
+	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/build
+.PHONY : centralized/fast
 
-#=============================================================================
-# Target rules for targets named sim
+src/centralized.o: src/centralized.cpp.o
 
-# Build rule for target.
-sim: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 sim
-.PHONY : sim
+.PHONY : src/centralized.o
 
-# fast build rule for target.
-sim/fast:
-	$(MAKE) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/build
-.PHONY : sim/fast
+# target to build an object file
+src/centralized.cpp.o:
+	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/centralized.cpp.o
+.PHONY : src/centralized.cpp.o
+
+src/centralized.i: src/centralized.cpp.i
+
+.PHONY : src/centralized.i
+
+# target to preprocess a source file
+src/centralized.cpp.i:
+	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/centralized.cpp.i
+.PHONY : src/centralized.cpp.i
+
+src/centralized.s: src/centralized.cpp.s
+
+.PHONY : src/centralized.s
+
+# target to generate assembly for a file
+src/centralized.cpp.s:
+	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/centralized.cpp.s
+.PHONY : src/centralized.cpp.s
+
+src/centralized_main.o: src/centralized_main.cpp.o
+
+.PHONY : src/centralized_main.o
+
+# target to build an object file
+src/centralized_main.cpp.o:
+	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/centralized_main.cpp.o
+.PHONY : src/centralized_main.cpp.o
+
+src/centralized_main.i: src/centralized_main.cpp.i
+
+.PHONY : src/centralized_main.i
+
+# target to preprocess a source file
+src/centralized_main.cpp.i:
+	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/centralized_main.cpp.i
+.PHONY : src/centralized_main.cpp.i
+
+src/centralized_main.s: src/centralized_main.cpp.s
+
+.PHONY : src/centralized_main.s
+
+# target to generate assembly for a file
+src/centralized_main.cpp.s:
+	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/centralized_main.cpp.s
+.PHONY : src/centralized_main.cpp.s
 
 src/factor.o: src/factor.cpp.o
 
@@ -142,7 +183,7 @@ src/factor.o: src/factor.cpp.o
 
 # target to build an object file
 src/factor.cpp.o:
-	$(MAKE) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/factor.cpp.o
+	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/factor.cpp.o
 .PHONY : src/factor.cpp.o
 
 src/factor.i: src/factor.cpp.i
@@ -151,7 +192,7 @@ src/factor.i: src/factor.cpp.i
 
 # target to preprocess a source file
 src/factor.cpp.i:
-	$(MAKE) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/factor.cpp.i
+	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/factor.cpp.i
 .PHONY : src/factor.cpp.i
 
 src/factor.s: src/factor.cpp.s
@@ -160,89 +201,8 @@ src/factor.s: src/factor.cpp.s
 
 # target to generate assembly for a file
 src/factor.cpp.s:
-	$(MAKE) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/factor.cpp.s
+	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/factor.cpp.s
 .PHONY : src/factor.cpp.s
-
-src/factors.o: src/factors.cpp.o
-
-.PHONY : src/factors.o
-
-# target to build an object file
-src/factors.cpp.o:
-	$(MAKE) -f CMakeFiles/wmn_sim.dir/build.make CMakeFiles/wmn_sim.dir/src/factors.cpp.o
-.PHONY : src/factors.cpp.o
-
-src/factors.i: src/factors.cpp.i
-
-.PHONY : src/factors.i
-
-# target to preprocess a source file
-src/factors.cpp.i:
-	$(MAKE) -f CMakeFiles/wmn_sim.dir/build.make CMakeFiles/wmn_sim.dir/src/factors.cpp.i
-.PHONY : src/factors.cpp.i
-
-src/factors.s: src/factors.cpp.s
-
-.PHONY : src/factors.s
-
-# target to generate assembly for a file
-src/factors.cpp.s:
-	$(MAKE) -f CMakeFiles/wmn_sim.dir/build.make CMakeFiles/wmn_sim.dir/src/factors.cpp.s
-.PHONY : src/factors.cpp.s
-
-src/sim.o: src/sim.cpp.o
-
-.PHONY : src/sim.o
-
-# target to build an object file
-src/sim.cpp.o:
-	$(MAKE) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/sim.cpp.o
-.PHONY : src/sim.cpp.o
-
-src/sim.i: src/sim.cpp.i
-
-.PHONY : src/sim.i
-
-# target to preprocess a source file
-src/sim.cpp.i:
-	$(MAKE) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/sim.cpp.i
-.PHONY : src/sim.cpp.i
-
-src/sim.s: src/sim.cpp.s
-
-.PHONY : src/sim.s
-
-# target to generate assembly for a file
-src/sim.cpp.s:
-	$(MAKE) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/sim.cpp.s
-.PHONY : src/sim.cpp.s
-
-src/solve.o: src/solve.cpp.o
-
-.PHONY : src/solve.o
-
-# target to build an object file
-src/solve.cpp.o:
-	$(MAKE) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/solve.cpp.o
-.PHONY : src/solve.cpp.o
-
-src/solve.i: src/solve.cpp.i
-
-.PHONY : src/solve.i
-
-# target to preprocess a source file
-src/solve.cpp.i:
-	$(MAKE) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/solve.cpp.i
-.PHONY : src/solve.cpp.i
-
-src/solve.s: src/solve.cpp.s
-
-.PHONY : src/solve.s
-
-# target to generate assembly for a file
-src/solve.cpp.s:
-	$(MAKE) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/solve.cpp.s
-.PHONY : src/solve.cpp.s
 
 src/solver.o: src/solver.cpp.o
 
@@ -250,7 +210,7 @@ src/solver.o: src/solver.cpp.o
 
 # target to build an object file
 src/solver.cpp.o:
-	$(MAKE) -f CMakeFiles/wmn_sim.dir/build.make CMakeFiles/wmn_sim.dir/src/solver.cpp.o
+	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/solver.cpp.o
 .PHONY : src/solver.cpp.o
 
 src/solver.i: src/solver.cpp.i
@@ -259,7 +219,7 @@ src/solver.i: src/solver.cpp.i
 
 # target to preprocess a source file
 src/solver.cpp.i:
-	$(MAKE) -f CMakeFiles/wmn_sim.dir/build.make CMakeFiles/wmn_sim.dir/src/solver.cpp.i
+	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/solver.cpp.i
 .PHONY : src/solver.cpp.i
 
 src/solver.s: src/solver.cpp.s
@@ -268,35 +228,8 @@ src/solver.s: src/solver.cpp.s
 
 # target to generate assembly for a file
 src/solver.cpp.s:
-	$(MAKE) -f CMakeFiles/wmn_sim.dir/build.make CMakeFiles/wmn_sim.dir/src/solver.cpp.s
+	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/solver.cpp.s
 .PHONY : src/solver.cpp.s
-
-src/wmn_sim.o: src/wmn_sim.cpp.o
-
-.PHONY : src/wmn_sim.o
-
-# target to build an object file
-src/wmn_sim.cpp.o:
-	$(MAKE) -f CMakeFiles/wmn_sim.dir/build.make CMakeFiles/wmn_sim.dir/src/wmn_sim.cpp.o
-.PHONY : src/wmn_sim.cpp.o
-
-src/wmn_sim.i: src/wmn_sim.cpp.i
-
-.PHONY : src/wmn_sim.i
-
-# target to preprocess a source file
-src/wmn_sim.cpp.i:
-	$(MAKE) -f CMakeFiles/wmn_sim.dir/build.make CMakeFiles/wmn_sim.dir/src/wmn_sim.cpp.i
-.PHONY : src/wmn_sim.cpp.i
-
-src/wmn_sim.s: src/wmn_sim.cpp.s
-
-.PHONY : src/wmn_sim.s
-
-# target to generate assembly for a file
-src/wmn_sim.cpp.s:
-	$(MAKE) -f CMakeFiles/wmn_sim.dir/build.make CMakeFiles/wmn_sim.dir/src/wmn_sim.cpp.s
-.PHONY : src/wmn_sim.cpp.s
 
 # Help Target
 help:
@@ -305,27 +238,20 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... rebuild_cache"
+	@echo "... centralized"
 	@echo "... edit_cache"
-	@echo "... wmn_sim"
-	@echo "... sim"
+	@echo "... src/centralized.o"
+	@echo "... src/centralized.i"
+	@echo "... src/centralized.s"
+	@echo "... src/centralized_main.o"
+	@echo "... src/centralized_main.i"
+	@echo "... src/centralized_main.s"
 	@echo "... src/factor.o"
 	@echo "... src/factor.i"
 	@echo "... src/factor.s"
-	@echo "... src/factors.o"
-	@echo "... src/factors.i"
-	@echo "... src/factors.s"
-	@echo "... src/sim.o"
-	@echo "... src/sim.i"
-	@echo "... src/sim.s"
-	@echo "... src/solve.o"
-	@echo "... src/solve.i"
-	@echo "... src/solve.s"
 	@echo "... src/solver.o"
 	@echo "... src/solver.i"
 	@echo "... src/solver.s"
-	@echo "... src/wmn_sim.o"
-	@echo "... src/wmn_sim.i"
-	@echo "... src/wmn_sim.s"
 .PHONY : help
 
 

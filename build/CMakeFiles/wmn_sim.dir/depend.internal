@@ -694,7 +694,8 @@ CMakeFiles/wmn_sim.dir/src/factors.cpp.o
  /usr/local/lib/cmake/GTSAM/../../../include/gtsam/slam/dataset.h
  /usr/local/lib/cmake/GTSAM/../../../include/gtsam_unstable/linear/LinearInequality.h
 CMakeFiles/wmn_sim.dir/src/solver.cpp.o
- ../include/factors.h
+ ../include/centralized.h
+ ../include/factor.h
  ../include/solver.h
  /home/ryan/wmn_flowcontrol/src/solver.cpp
  /usr/include/eigen3/Eigen/Cholesky
@@ -1374,6 +1375,7 @@ CMakeFiles/wmn_sim.dir/src/solver.cpp.o
  /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/ISAM2UpdateParams.h
  /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/LevenbergMarquardtOptimizer.h
  /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/LevenbergMarquardtParams.h
+ /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/Marginals.h
  /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/NonlinearFactor.h
  /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/NonlinearFactorGraph.h
  /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/NonlinearOptimizer.h
@@ -1387,7 +1389,8 @@ CMakeFiles/wmn_sim.dir/src/solver.cpp.o
  /usr/local/lib/cmake/GTSAM/../../../include/gtsam/slam/dataset.h
  /usr/local/lib/cmake/GTSAM/../../../include/gtsam_unstable/linear/LinearInequality.h
 CMakeFiles/wmn_sim.dir/src/wmn_sim.cpp.o
- ../include/factors.h
+ ../include/centralized.h
+ ../include/factor.h
  ../include/solver.h
  /home/ryan/wmn_flowcontrol/src/wmn_sim.cpp
  /usr/include/eigen3/Eigen/Cholesky
@@ -2067,6 +2070,7 @@ CMakeFiles/wmn_sim.dir/src/wmn_sim.cpp.o
  /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/ISAM2UpdateParams.h
  /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/LevenbergMarquardtOptimizer.h
  /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/LevenbergMarquardtParams.h
+ /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/Marginals.h
  /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/NonlinearFactor.h
  /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/NonlinearFactorGraph.h
  /usr/local/lib/cmake/GTSAM/../../../include/gtsam/nonlinear/NonlinearOptimizer.h

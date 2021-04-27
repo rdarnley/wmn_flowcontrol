@@ -15,6 +15,7 @@
 
 using namespace Eigen;
 #include <gtsam/nonlinear/NonlinearFactor.h>
+#include <gtsam/linear/GaussianFactor.h>
 #include <bits/stdc++.h>
 #include <gtsam/slam/dataset.h>
 #include <gtsam/slam/BetweenFactor.h>

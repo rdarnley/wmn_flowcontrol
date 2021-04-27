@@ -1,529 +1,415 @@
 #include "solver.h"
+#include "centralized.h"
 
-void processResult(const vector<vector<SolverOutput>>& result){
+// void processResult(const vector<vector<SolverOutput>>& result){
 
-    std::ofstream myFileResults("experimentResults.csv");
-    int expCt = 0;
-    for (auto solns: result){
+//     std::ofstream myFileResults("experimentResults.csv");
+//     int expCt = 0;
+//     for (auto solns: result){
 
-        std::cout << "For experiment " << expCt << ", results are - " << std::endl;
+//         std::cout << "For experiment " << expCt << ", results are - " << std::endl;
 
-        for (auto soln: solns){
+//         for (auto soln: solns){
 
-            std::cout << "Solver Type - " << soln.solverType << ", Ordering is " << soln.orderingType;
-            std::cout << ", Time steps are " << soln.num_time_steps << ", Runtime = " << soln.runtime;
-            std::cout << ", Cost = " << soln.cost << std::endl;
+//             std::cout << "Solver Type - " << soln.solverType << ", Ordering is " << soln.orderingType;
+//             std::cout << ", Time steps are " << soln.num_timesteps << ", Runtime = " << soln.runtime;
+//             std::cout << ", Cost = " << soln.cost << std::endl;
 
-            myFileResults << expCt << "," << soln.solverType << "," << soln.orderingType << "," << soln.num_time_steps << ",";
-            myFileResults << soln.runtime << "," << soln.cost << "\n";
-        } // end inner for loop
+//             myFileResults << expCt << "," << soln.solverType << "," << soln.orderingType << "," << soln.num_timesteps << ",";
+//             myFileResults << soln.runtime << "," << soln.cost << "\n";
+//         } // end inner for loop
 
-        myFileResults << "\n";
-        expCt++;
-    } // end outer for loop
+//         myFileResults << "\n";
+//         expCt++;
+//     } // end outer for loop
 
-    myFileResults.close();
+//     myFileResults.close();
 
-} // end processResult
+// } // end processResult
 
-FGSolver::FGSolver(){
+LqrSolver::LqrSolver(){
 
-} // end FGSolver Constructor
+} // end LqrSolver Constructor
 
-void FGSolver::init(int numTimeSteps_, int numNodes_, int numControl_, int initValue_, int finalValue_) {
+void LqrSolver::CreateScenario(int num_nodes_, int num_control_, int state_space_total_, int queue_init_, int rate_init_, int queue_final_, int rate_final_) {
+
+    
+    std::cout << "Entered CreateScenario" << std::endl;
+
     // Parse Input
-    numTimeSteps = numTimeSteps_;
-    numNodes = numNodes_;
-    numControl = numControl_;
-    initValue = initValue_;
-    finalValue = finalValue_;
+    queue_init = queue_init_;
+    rate_init = rate_init_;
+    queue_final = queue_final_;
+    rate_final = rate_final_;
 
-    std::cout << "Initializing Solver" << std::endl;
+    num_nodes = num_nodes_;
+    num_control = num_control_;
+
+    state_space = 2;
+    state_space_total = state_space_total_;
 
     // Initialize Other Variables
-    numStates = 1;
-    timeStep = 0.05;
-    q = 10;
-    q_f = 100;
-    r = 1;
-    U_est = gtsam::Vector(1); U_est << 0.1;
+    // U_est = gtsam::Vector(1); U_est << 0.1;
 
     // Create Constrained Noise Models
-    std::cout << "Creating Constrained Noise Models" << std::endl;
-    priorNoise = noiseModel::Constrained::All(numStates);
-    dynNoise = noiseModel::Constrained::All(numStates);
+    prior_noise = noiseModel::Constrained::All(state_space);
+    dyn_noise = noiseModel::Constrained::All(state_space);
 
     // Initialize Prior
-    priorState = gtsam::Vector(numStates); priorState << initValue;
-    finalState = gtsam::Vector(numStates); finalState << finalValue;
+    prior_state = gtsam::Vector(state_space); prior_state << queue_init, rate_init;
+    final_state = gtsam::Vector(state_space); final_state << queue_final, rate_final;
 
     // Initialize Full Matrices
-    std::cout << "Initializing Full Matrices" << std::endl;
-    A_full = MatrixXd::Zero(numNodes, numNodes);
-    B_full = MatrixXd::Zero(numNodes, numControl);
-    Q_full = MatrixXd::Zero(numNodes, numNodes);
-    Qf_full = MatrixXd::Zero(numNodes, numNodes);
-    R_full = MatrixXd::Zero(numControl, numControl);
+    A_full = MatrixXd::Zero(state_space * num_nodes, state_space * num_nodes);
+    B_full = MatrixXd::Zero(state_space * num_nodes, num_control);
+    Q_full = MatrixXd::Zero(state_space * num_nodes, state_space * num_nodes);
+    Qf_full = MatrixXd::Zero(state_space * num_nodes, state_space * num_nodes);
+    R_full = MatrixXd::Zero(num_control, num_control);
 
     // Assign Which Nodes Are Drivers ??? Others Fixed Rate ???
-    std::cout << "Assign Drivers/Fixed Rate???" << std::endl;
-
-    driverIdx = unordered_map<int, int>();
-    for(int i=0; i<numControl; i++){
-        driverIdx[i*numNodes/numControl] = i;
-    } // end driverIdx for loop
-
-    // std::cout << "Driver Idx" << std::endl;
-    // std::cout << driverIdx << std::endl;
+    driver_idx = unordered_map<int, int>();
+    for(int i=0; i<num_control; i++){
+        driver_idx[i*num_nodes/num_control] = i;
+    } // end driver_idx for loop
 
     // Create Initial States
-    std::cout << "Created X Initial Vector" << std::endl;
-    X_init = MatrixXd::Zero(numNodes, 1);
+    X_init = MatrixXd::Zero(state_space * num_nodes, 1);
 
-    std::cout << "Populating X Initial Vector" << std::endl;
-    for(int i = 0; i < numNodes; i++) {
-        X_init(i, 0) = priorState(0);
+    for(int i = 0; i < num_nodes; i++) {
+        X_init(2*i, 0) = prior_state(0);
+        X_init(2*i+1,0) = prior_state(1);
     } // end Initialization for loop
 
-    std::cout << X_init << std::endl;
-
     // Initialize Factor Graph
-    std::cout << "Initializing Nonlinear Factor Graph" << std::endl;
-    graph = NonlinearFactorGraph();
+    // graph = NonlinearFactorGraph();
+    graph = GaussianFactorGraph();
     initialEstimate = Values();
 
     vector<Key> temp;
-    X = vector<vector<Key>>(numNodes, temp);
+    X = vector<vector<Key>>(num_nodes, temp);
 
     vector<Key> tempU;
-    U = vector<vector<Key>>(numControl, tempU);
+    U = vector<vector<Key>>(num_control, tempU);
 
-    std::cout << "Creating X Labeled Symbols. Pushing to Graph" << std::endl;
-
-    for(int j=0; j<numNodes; j++) {
-        for(int i=0; i<numTimeSteps; i++) {
+    for(int j=0; j<num_nodes; j++) {
+        for(int i=0; i<num_timesteps; i++) {
             X[j].push_back(gtsam::LabeledSymbol('x', j, i));
         } // end inner for loop
     } // end outer for loop
 
-    std::cout << "Creating U Labeled Symbols. Pushing to Graph" << std::endl;
-
-    for(int j=0; j<numControl; j++) {
-        for(int i=0; i<numTimeSteps; i++) {
+    for(int j=0; j<num_control; j++) {
+        for(int i=0; i<num_timesteps; i++) {
             U[j].push_back(gtsam::LabeledSymbol('u', j, i));
         } // end inner for loop
     } // end outer for loop
 
-    std::cout << "Set Initial State As Prior" << std::endl;
-
-    for (int i=0; i<numNodes; i++) {
-        graph.add(PriorFactor<gtsam::Vector>(X[i][0], priorState, priorNoise));
+    for (int i=0; i<num_nodes; i++) {
+        // graph.add(PriorFactor<gtsam::Vector>(X[i][0], prior_state, prior_noise));
+        graph.add(X[i][0], MatrixXd::Identity(2,2), prior_state, prior_noise);
     } // end prior factor for loop
 
-    std::cout << "Setting Individual Node Dynamics --> Linear Chain For Now" << std::endl;
+    MatrixXd positive_one = MatrixXd::Zero(1,1);
+    positive_one << 1;
 
-    std::cout << "Adding Ternary Factors -- Dynamics Constraints" << std::endl;
+    MatrixXd control_cost_mat = MatrixXd::Zero(1,1);
+    control_cost_mat << control_cost;
 
-    std::cout << "Outside Loop: Spatial" << std::endl;
-    std::cout << "Inside Loop: Temporal" << std::endl;
-
-    for(int i2 = 0; i2 < numNodes - 1; i2++) {
+    for(int i2 = 0; i2 < num_nodes; i2++) {
 
         // Check if node is active or passive
         bool applyControl = false; int controlIdx = -1; 
         bool lastApplyControl = false; int lastControlIdx = -1;
 
-        if(driverIdx.find(i2) != driverIdx.end()){
+        if(driver_idx.find(i2) != driver_idx.end()){
             applyControl = true;
-            controlIdx = driverIdx[i2];
+            controlIdx = driver_idx[i2];
         } // end apply control if statement
 
-        if(driverIdx.find(i2-1) != driverIdx.end()){
-            lastApplyControl = true;
-            lastControlIdx = driverIdx[i2-1];
-        }
-
-        // Populate Full Matrices
-        MatrixXd a = MatrixXd::Zero(1,1);
-        a << 1;
-        
+        // Fill A Matrix
         if (i2 == 0){
-            A_full.block<1,1>(0,0) = a;     
-        } else {                            // end first condition
-            A_full.block<1,1>(i2, i2) = a;
-        } // end else condition
-
-        std::cout << "Check 1" << std::endl;
-
-        std::cout << "I2 " << i2 << std::endl;
-        std::cout << "Control IDX " << controlIdx << std::endl;
-        std::cout << "Last Control IDX " <<lastControlIdx << std::endl;
-
-        if(applyControl && lastApplyControl) {
-
-            MatrixXd b = MatrixXd::Zero(1,2);
-            b << 1, -1;
-            B_full.block<1,2>(i2, controlIdx-1) = b;
-
-        } else if (applyControl && !lastApplyControl) {
-
-            MatrixXd b = MatrixXd::Zero(1,1);
-            b << -1;
-            B_full.block<1,1>(i2, controlIdx) = b;
-
-        } else if (!applyControl && lastApplyControl) {
-
-            MatrixXd b = MatrixXd::Zero(1,1);
-            b << 1;
-            B_full.block<1,1>(i2, lastControlIdx) = b;
-
-        } else if (!applyControl && !lastApplyControl) {
-
-            MatrixXd b = MatrixXd::Zero(1,1);
-
+            MatrixXd a = MatrixXd::Zero(1,2);   a << 1, -1;
+            A_full.block<1,2>(0,0) = a;
         } else {
-            std::cout << "ERROR: Wrong node dynamics/constraints" << std::endl;
+            MatrixXd a = MatrixXd::Zero(1,3);   a << 1, 1, -1;
+            A_full.block<1,3>(2*i2, 2*i2-1) = a;
         }
 
-        Q_full(i2, i2) = q;
-        Qf_full(i2, i2) = q_f;
+        A_full.block<1,1>(2*i2+1, 2*i2+1) = positive_one;
 
-        std::cout << "Check 2" << std::endl;
+        // Fill B Matrix
+        if(applyControl){
+            B_full.block<1,1>(2*i2+1, controlIdx) = positive_one;
 
-        // Iterate Through TimeSteps
-        for (int i1 = 0; i1<numTimeSteps-1; i1++) {
+            // R_full.block<1,1>(controlIdx, controlIdx) = control_cost_mat;
+            R_full(controlIdx, controlIdx) = control_cost;
+        }
 
-            // Add 5-Factor (X[i2][i1], X[i2+1][i1], X[i2][i1+1], X[i2+1][i1+1], U[controlIdx][i1], dynNoise);
-            if(applyControl && lastApplyControl) {
-                // Node Dynamics + Input From Prev Node Control + Output From Curr Node Control
-                graph.emplace_shared<Factor1>(X[i2][i1], U[lastControlIdx][i1], U[controlIdx][i1], X[i2][i1+1], dynNoise);
-            } else if (applyControl && !lastApplyControl) {
-                // Node Dynamics + Output From Curr Node Control
-                graph.emplace_shared<Factor2>(X[i2][i1], U[controlIdx][i1], X[i2][i1+1], dynNoise);
-            } else if (!applyControl && lastApplyControl) {
-                // Node Dynamics + Input From Prev Node Control
-                graph.emplace_shared<Factor3>(X[i2][i1], U[lastControlIdx][i1], X[i2][i1+1], dynNoise);
-            } else if (!applyControl && !lastApplyControl) {
-                // Node Dynamics
-                graph.emplace_shared<Factor4>(X[i2][i1], X[i2][i1+1], dynNoise);
+        // Fill Q Matrix
+        Q_full(2*i2, 2*i2) = state_cost;
+        Q_full(2*i2+1, 2*i2+1) = state_cost;
+        Qf_full(2*i2, 2*i2) = statef_cost;
+        Qf_full(2*i2+1, 2*i2+1) = statef_cost;
+
+        MatrixXd a_end = MatrixXd::Zero(2,2);   a_end << 1, -1, 0, 1;
+        MatrixXd a = MatrixXd::Zero(2,2);       a << 0, 1, 0, 0;
+        MatrixXd b = MatrixXd::Zero(2,1);       b << 0, 1;
+
+        // Iterate Through TimeSteps (For FG Method)
+        for (int i1=0; i1<num_timesteps-1; i1++) {
+
+            if(i2 == 0){
+                if(applyControl){
+                    // graph.emplace_shared<active_end>(X[i2][i1], U[controlIdx][i1], X[i2][i1+1], dyn_noise);
+                    graph.add(X[i2][i1], a_end, U[controlIdx][i1], b, X[i2][i1+1], -gtsam::Matrix::Identity(2,2), gtsam::Matrix::Zero(2,1), dyn_noise);
+                } else if(!applyControl) {
+                    // graph.emplace_shared<passive_end>(X[i2][i1], X[i2][i1+1], dyn_noise);
+                    graph.add(X[i2][i1], a_end, X[i2][i1+1], -gtsam::Matrix::Identity(2,2), gtsam::Matrix::Zero(2,1), dyn_noise);
+                } else {
+                    std::cout << "Error: Incorrect Factor 1" << std::endl;
+                }
             } else {
-                std::cout << "ERROR: NO FACTOR WAS CREATED FOR THESE NODE CONDITIONS" << std::endl;
+                if(applyControl){
+                    // graph.emplace_shared<active>(X[i2-1][i1], X[i2][i1], U[controlIdx][i1], X[i2][i1+1], dyn_noise);
+                    // graph.add(X[i2-1][i1], a, X[i2][i1], a_end, U[controlIdx][i1], b, X[i2][i1+1], -gtsam::Matrix::Identity(2,2), gtsam::Matrix::Zero(2,1), dyn_noise);
+                    vector<std::pair<Key, MatrixXd>> terms;
+                    terms.push_back(std::make_pair(X[i2-1][i1], a));
+                    terms.push_back(std::make_pair(X[i2][i1], a_end));
+                    terms.push_back(std::make_pair(U[controlIdx][i1], b));
+                    terms.push_back(std::make_pair(X[i2][i1+1], -gtsam::Matrix::Identity(2,2)));
+                    graph.add(terms, gtsam::Matrix::Zero(2,1), dyn_noise);
+                } else if(!applyControl) {
+                    // graph.emplace_shared<passive>(X[i2-1][i1], X[i2][i1], X[i2][i1+1], dyn_noise);
+                    graph.add(X[i2-1][i1], a, X[i2][i1], a_end, X[i2][i1+1], -gtsam::Matrix::Identity(2,2), gtsam::Matrix::Zero(2,1), dyn_noise);
+                } else {
+                    std::cout << "Error: Incorrect Factor 2" << std::endl;
+                }
             }
 
-        } // end inner for loop
+        } // end inner/temporal for loop
     } // end outer for loop
 
-    std::cout << "Initialize Factor Graph Costs" << std::endl;
+    // Q_node = gtsam::Vector(state_space); Q_node << state_cost, state_cost;
+    // Qf_node = gtsam::Vector(state_space); Qf_node << statef_cost, statef_cost;
 
-    Q_node = gtsam::Vector(numStates); Q_node << q;
-    Qf_node = gtsam::Vector(numStates); Qf_node << q_f;
+    // R = gtsam::Vector(1); R << control_cost;
 
-    R = gtsam::Vector(1); R << r;
+    // qmat_node = Q_node.array().matrix().asDiagonal();
+    // qfmat_node = Qf_node.array().matrix().asDiagonal();
+    // rmat = R.array().matrix().asDiagonal();
 
-    qmat_node = Q_node.array().matrix().asDiagonal();
-    qfmat_node = Qf_node.array().matrix().asDiagonal();
-    rmat = R.array().matrix().asDiagonal();
+    // auto q_node = noiseModel::Gaussian::Information(qmat_node);
+    // auto qf_node = noiseModel::Gaussian::Information(qfmat_node);
+    // auto r_noise = noiseModel::Gaussian::Information(rmat);
 
-    auto q_node = noiseModel::Gaussian::Information(qmat_node);
-    auto qf_node = noiseModel::Gaussian::Information(qfmat_node);
-    auto r_noise = noiseModel::Gaussian::Information(rmat);
+    // for(int i=0; i<num_nodes; i++){
+    //     for(int j=0; j<num_timesteps; j++) {
+    //         if(j==num_timesteps - 1){
+    //             // graph.add(PriorFactor<gtsam::Vector>(X[i][j], final_state, qf_node));
+    //             graph.add(X[i][j], MatrixXd::Identity(2,2), final_state, qf_node);
+    //         } else {
+    //             // graph.add(PriorFactor<gtsam::Vector>(X[i][j], final_state, q_node));
+    //             graph.add(X[i][j], MatrixXd::Identity(2,2), final_state, q_node);
+    //         }
+    //         // initialEstimate.insert(X[i][j], final_state);
+    //     }
+    // }
 
-    std::cout << "Add State Costs To Factor Graph" << std::endl;
+    // for(int i=0; i<num_control; i++) {
+    //     for(int j=0; j<num_timesteps-1; j++) {
+    //         // graph.add(PriorFactor<gtsam::Vector>(U[i][j], U_est, r_noise));
+    //         graph.add(U[i][j], MatrixXd::Identity(1,1), MatrixXd::Zero(1,1), qf_node);
 
-    for(int i=0; i<numNodes; i++){
-        for(int j=0; j<numTimeSteps; j++) {
-            if(j==numTimeSteps - 1){
-                graph.add(PriorFactor<gtsam::Vector>(X[i][j], finalState, qf_node));
-            } else {
-                graph.add(PriorFactor<gtsam::Vector>(X[i][j], finalState, q_node));
-            }
+    //         // initialEstimate.insert(U[i][j], U_est);
+    //     }
+    // }
+    return;   
+}
 
-            initialEstimate.insert(X[i][j], finalState);
-        }
-
-    }
-
-    std::cout << "Add Control Costs To Factor Graph" << std::endl;
-
-    for(int i=0; i<numControl; i++) {
-        for(int j=0; j<numTimeSteps-1; j++) {
-            graph.add(PriorFactor<gtsam::Vector>(U[i][j], U_est, r_noise));
-            initialEstimate.insert(U[i][j], U_est);
-        }
-    }
-
-    return;
+// // Solve Factor Graph With Different Variable Orderings
+// SolverOutput LqrSolver::SolveFG(int orderingType) {
     
-}
+//     std::cout << "Entered FG Solve" << std::endl;
 
-// Solve Factor Graph With Different Variable Orderings
-SolverOutput FGSolver::FGSolve(int orderingType) {
-    std::cout << "Entered FG Solve" << std::endl;
+//     // Create Some Sort of Order
+//     std::cout << "Using COLAMD Ordering" << std::endl;
+//     // order = graph.orderingCOLAMD();
 
-    // Create Some Sort of Order
-    std::cout << "Using COLAMD Ordering" << std::endl;
-    order = graph.orderingCOLAMD();
+//     // Create Instance of Optimizer
+//     // GaussNewtonOptimizer optimizer(graph, initialEstimate, order);
 
-    // Create Instance of Optimizer
-    GaussNewtonOptimizer optimizer(graph, initialEstimate, order);
-
-    // Start Timer
-    std::chrono::time_point<std::chrono::system_clock> start, end;
-    start = std::chrono::system_clock::now();
-
-    std::cout << "Before optimize call" << std::endl;
-    // Optimize Factor Graph
-    Values resultLQR = optimizer.optimize();
-
-    std::cout << "After optimize call" << std::endl;
-
-    // End Timer
-    end = std::chrono::system_clock::now();
-    std::chrono::duration<double> duration = end - start;
-    std::cout << "Factor Graph Took " << duration.count() << " seconds\n" << std::endl;
-
-    SolverOutput fgSoln(numNodes, numTimeSteps, numControl);
-    fgSoln.runtime = duration.count();
-    fgSoln.solverType = 0;
-    fgSoln.num_time_steps = numTimeSteps;
-    // fgSoln.orderingType = ordering
-
-    // Calculate Cost of Factor Graph
-    double cost_fg = 0.;
-
-    std::cout << "Calculating Total Cost of FG" << std::endl;
-
-    for(int i1 = 0; i1 < numTimeSteps; i1++) {
-
-        // Add Costs For States
-        for(int i2=0; i2 < numNodes; i2++) {
-
-            fgSoln.states(i2, i1) = ( gtsam::Vector(1) << resultLQR.at<VectorXd>(X[i2][i1])(0) ).finished();
-
-            if (i1 < numTimeSteps - 1){
-                cost_fg += pow(fgSoln.states(i2,i1)(0),2.)*Q_node(0);
-            } else {
-                cost_fg += pow(fgSoln.states(i2,i1)(0),2.)*Qf_node(0);
-            }
-
-        }
-
-        // Add Costs For Controls
-        if(i1 < numTimeSteps - 1) {
-            for(int i4=0; i4<numControl; i4++) {
-
-                fgSoln.controls(i4, i1) = resultLQR.at<VectorXd>(U[i4][i1])(0);
-                cost_fg += pow(fgSoln.controls(i4,i1),2.)*R_full(i4,i4);
-            } 
-        }
-    }     
-
-    std::cout << "Total Cost for FG: " << cost_fg << std::endl;
-    fgSoln.cost = cost_fg;
-
-    return fgSoln;
-}
-
-
-SolverOutput FGSolver::FGSim(const SolverOutput& fgSoln)
-{
-    MatrixXd X_fg = MatrixXd::Zero(numNodes*numStates, numTimeSteps);
-
-    MatrixXd cost_fgsim = MatrixXd::Zero(1,1);
-
-    SolverOutput fgsimSoln = fgSoln;
-    fgsimSoln.solverType=1;
-
-    // Forward Simulation
-    X_fg.col(0) = X_init;
-    for (int i = 0; i < numTimeSteps - 1; i++){
-
-        X_fg.col(i+1) = A_full * X_fg.col(i) + B_full * fgSoln.controls.col(i);
-
-        cost_fgsim += X_fg.col(i).transpose() * Q_full * X_fg.col(i);
-        cost_fgsim += fgSoln.controls.col(i).transpose()*R_full*fgSoln.controls.col(i);
-    }
-
-    cost_fgsim += X_fg.col(numTimeSteps-1).transpose() * Qf_full * X_fg.col(numTimeSteps-1);
-
-    std::cout << "Cost for FG Sim is " << cost_fgsim << std::endl;
-
-    fgsimSoln.cost = cost_fgsim(0,0);
-
-    matrixToOutput(fgsimSoln, X_fg);
-
-    return fgsimSoln;
-}
-
-// // Control Toolbox To Solve LQR Problem
-// SolverOutput FGSolver::CTSolve()
-// {
-//     std::cout << "Entered Control Toolbox Solve" << std::endl;
-
-//     // template<int stateSpaceSize, int numControlCT>
-
-//     // assert(numControl == numControlCT);
-
-// 		/**** Control toolbox for benchmarking ****/
-//     MatrixXd X_stacked = MatrixXd::Zero(numNodes*numStates, numTimeSteps);
-//     MatrixXd U_stacked = MatrixXd::Zero(numControl, numTimeSteps-1);
-
-//     shared_ptr<ct::optcon::TermQuadratic<numNodes, numControl>> intermCost(
-// 	  	new ct::optcon::TermQuadratic<numNodes, numControl>(Q_full, R_full));
-
-//     shared_ptr<ct::optcon::TermQuadratic<numNodes, numControl>> finCost(
-// 	  	new ct::optcon::TermQuadratic<numNodes, numControl>(Qf_full, R_full));
-
-//     shared_ptr<ct::optcon::CostFunctionQuadratic<numNodes, numControl>> quadraticCost(
-// 	  	new ct::optcon::CostFunctionAnalytical<numNodes, numControl>());
-
-//     quadraticCost->addIntermediateTerm(intermCost);
-//     quadraticCost->addFinalTerm(finCost);
-
+//     // Start Timer
 //     std::chrono::time_point<std::chrono::system_clock> start, end;
-//     start = std::chrono::system_clock::now(); 
+//     start = std::chrono::system_clock::now();
 
-//     ct::optcon::FHDTLQR<numNodes, numControl> lqrSolver(quadraticCost);
-//     ct::core::FeedbackArray<numNodes, numControl> K_ct;
+//     // Optimize Factor Graph
+//     // Values resultLQR = optimizer.optimize();
+//     VectorValues resultLQR = graph.optimize();
 
-//     ct::core::StateVectorArray<numNodes> x_ref_init(numTimeSteps, 
-//     ct::core::StateVector<numNodes>::Zero() );
-
-//     ct::core::ControlVectorArray<numControl> u0_ff(numTimeSteps-1, ct::core::ControlVector<numControl>::Zero());
-
-//     ct::core::StateMatrix<numNodes> A_ct(A_full);
-//     ct::core::StateMatrixArray<numNodes> A_ct_vec(numTimeSteps-1, A_ct);
-//     ct::core::StateControlMatrix<numNodes, numControl> B_ct(B_full);
-//     ct::core::StateControlMatrixArray<numNodes, numControl> B_ct_vec(numTimeSteps-1, B_ct);
-
-//     lqrSolver.designController( x_ref_init, u0_ff, A_ct_vec, B_ct_vec, p.dt, K_ct);
+//     // End Timer
 //     end = std::chrono::system_clock::now();
-//     std::chrono::duration<double> elapsed_seconds = end - start; 
-//     std::cout << "elapsed time for Control Toolbox is: " << elapsed_seconds.count() << "s\n";
+//     std::chrono::duration<double> duration = end - start;
 
-//     SolverOutput ctSoln(numNodes, numTimeSteps, numControl);
-//     ctSoln.runtime = elapsed_seconds.count();
-//     ctSoln.solverType=2;
+//     SolverOutput fgSoln(num_nodes, num_timesteps, num_control);
+//     fgSoln.runtime = duration.count();
+//     fgSoln.solverType = "Factor Graph";
+//     fgSoln.num_timesteps = num_timesteps;
+//     // fgSoln.orderingType = ordering
 
-//     X_stacked.col(0) = X_init;
-//     MatrixXd cost_ct = MatrixXd::Zero(1,1);+++
-//     for(int i1=0; i1<numTimeSteps-1; i1++){
+//     // Calculate Cost of Factor Graph
+//     double cost_fg = 0.;
 
-//         U_stacked.col(i1) = K_ct[i1] * X_stacked.col(i1);
-//         X_stacked.col(i1+1) = A_full * X_stacked.col(i1) + B_full * U_stacked.col(i1);
+//     for(int i1 = 0; i1 < num_timesteps; i1++) {
 
-//         cost_ct += X_stacked.col(i1).transpose() * Q_full * X_stacked.col(i1);
-//         cost_ct += U_stacked.col(i1).transpose() * R_full * U_stacked.col(i1);		
+//         // Add Costs For States
+//         for(int i2=0; i2 < num_nodes; i2++) {
 
-//     }
-//     cost_ct += X_stacked.col(numTimeSteps-1).transpose() * Qf_full * X_stacked.col(numTimeSteps-1);
-//     ctSoln.cost = cost_ct(0,0);  
-//     cout<<"Cost for Control Toolbox is "<<cost_ct<<endl;
+//             fgSoln.states(i2, i1) = ( gtsam::Vector(1) << resultLQR.at<VectorXd>(X[i2][i1])(0) ).finished();
 
-//     ctSoln.controls = U_stacked;
-//     matrixToOutput(ctSoln, X_stacked);
+//             if (i1 < num_timesteps - 1){
+//                 cost_fg += pow(fgSoln.states(i2,i1)(0),2.)*Q_node(0);
+//             } else {
+//                 cost_fg += pow(fgSoln.states(i2,i1)(0),2.)*Qf_node(0);
+//             }
 
-//     return ctSoln;
+//         }
+
+//         // Add Costs For Controls
+//         if(i1 < num_timesteps - 1) {
+//             for(int i4=0; i4<num_control; i4++) {
+
+//                 fgSoln.controls(i4, i1) = resultLQR.at<VectorXd>(U[i4][i1])(0);
+//                 cost_fg += pow(fgSoln.controls(i4,i1),2.)*R_full(i4,i4);
+//             } 
+//         }
+//     }     
+
+//     fgSoln.cost = cost_fg;
+
+//     // output.push_back(fgSoln);
+//     // PrintResultTerminal(fgSoln);
+
+//     return fgSoln;
 // }
 
-// Ricatti Equation To Solve LQR Problem
-SolverOutput FGSolver::DARESolve()
-{
-    std::cout << "Entered DARE Solve" << std::endl;
 
-    vector<MatrixXd> P_val(numTimeSteps, Qf_full);
-    MatrixXd X_lqr = MatrixXd::Zero(numNodes, numTimeSteps);
-    MatrixXd U_lqr = MatrixXd::Zero(numControl, numTimeSteps-1);
-    MatrixXd cost_lqr = MatrixXd::Zero(1,1);
+// SolverOutput FGSolver::FGSim(const SolverOutput& fgSoln)
+// {
+//     MatrixXd X_fg = MatrixXd::Zero(num_nodes*numStates, num_timesteps);
 
-    SolverOutput lqrSoln(numNodes, numTimeSteps, numControl);
-    lqrSoln.solverType = 3;
+//     MatrixXd cost_fgsim = MatrixXd::Zero(1,1);
 
-    std::cout << "Starting Timer" << std::endl;
+//     SolverOutput fgsimSoln = fgSoln;
+//     fgsimSoln.solverType=1;
 
-    std::chrono::time_point<std::chrono::system_clock> start, end;
-    start = std::chrono::system_clock::now();
+//     // Forward Simulation
+//     X_fg.col(0) = X_init;
+//     for (int i = 0; i < num_timesteps - 1; i++){
 
-    // Backward Pass With Ricatti
-    for (int i=numTimeSteps-1; i>0; i--) {
-        P_val[i-1] = Q_full + A_full.transpose()*P_val[i]*A_full - 
-        A_full.transpose()*P_val[i]*B_full*(R_full + B_full.transpose()*
-        P_val[i]*B_full).colPivHouseholderQr().solve(B_full.transpose()*P_val[i]*A_full);
-    }
+//         X_fg.col(i+1) = A_full * X_fg.col(i) + B_full * fgSoln.controls.col(i);
 
-    std::cout << "Check 1" << std::endl;
+//         cost_fgsim += X_fg.col(i).transpose() * Q_full * X_fg.col(i);
+//         cost_fgsim += fgSoln.controls.col(i).transpose()*R_full*fgSoln.controls.col(i);
+//     }
 
-    // Forward Pass
-    X_lqr.col(0) = X_init;
+//     cost_fgsim += X_fg.col(num_timesteps-1).transpose() * Qf_full * X_fg.col(num_timesteps-1);
 
-    for (int i=0; i<numTimeSteps-1; i++) {
+//     std::cout << "Cost for FG Sim is " << cost_fgsim << std::endl;
 
-        // std::cout << "Check a" << std::endl;
-        // MatrixXd k_mat = -1.0*(R_full + B_full.transpose()*P_val[i]*B_full).colPivHouseholderQr().solve(B_full.transpose()*P_val[i]*A_full);
+//     fgsimSoln.cost = cost_fgsim(0,0);
 
-        // std::cout << "Check b" << std::endl;
-        // U_lqr.col(i) = k_mat * X_lqr.col(i);
+//     matrixToOutput(fgsimSoln, X_fg);
 
-        // std::cout << "Check b2" << std::endl;
-        // X_lqr.col(i+1) = A_full * X_lqr.col(i) + B_full * U_lqr.col(i);
+//     return fgsimSoln;
+// }
 
-        // std::cout << "Check c" << std::endl; 
-        // cost_lqr += X_lqr.col(i).transpose() * Q_full * X_lqr.col(i);
-        // cost_lqr += U_lqr.col(i).transpose() * R_full * U_lqr.col(i);
+// // Ricatti Equation To Solve LQR Problem
+// SolverOutput LqrSolver::SolveDARE()
+// {
+//     std::cout << "Entered DARE Solve" << std::endl;
 
-		MatrixXd k_mat = -1.0*(R_full + B_full.transpose()*P_val[i]*B_full)
-			.colPivHouseholderQr().solve(B_full.transpose()*P_val[i]*A_full);
+//     vector<MatrixXd> P_val(num_timesteps, Qf_full);
+//     MatrixXd X_lqr = MatrixXd::Zero(state_space * num_nodes, num_timesteps);
+//     MatrixXd U_lqr = MatrixXd::Zero(num_control, num_timesteps-1);
+//     MatrixXd cost_lqr = MatrixXd::Zero(1,1);
 
-        // std::cout << k_mat << std::endl;
+//     SolverOutput lqrSoln(num_nodes, num_timesteps, num_control);
+//     lqrSoln.solverType = "DARE";
 
-        // std::cout << "\n" << std::endl;
+//     std::chrono::time_point<std::chrono::system_clock> start, end;
+//     start = std::chrono::system_clock::now();
 
-        // std::cout << X_lqr.col(i) << std::endl;
+//     // Backward Pass With Ricatti
+//     for (int i=num_timesteps-1; i>0; i--) {
+//         P_val[i-1] = Q_full + A_full.transpose()*P_val[i]*A_full - 
+//         A_full.transpose()*P_val[i]*B_full*(R_full + B_full.transpose()*
+//         P_val[i]*B_full).colPivHouseholderQr().solve(B_full.transpose()*P_val[i]*A_full);
+//     }
 
-		U_lqr.col(i) = k_mat * X_lqr.col(i);
-		X_lqr.col(i+1) = A_full * X_lqr.col(i) + B_full * U_lqr.col(i);
+//     // Forward Pass
+//     X_lqr.col(0) = X_init;
 
-	 	cost_lqr += X_lqr.col(i).transpose() * Q_full * X_lqr.col(i);
-	 	cost_lqr += U_lqr.col(i).transpose() * R_full * U_lqr.col(i);
+//     for (int i=0; i<num_timesteps-1; i++) {
+
+//         // std::cout << "Check a" << std::endl;
+//         // MatrixXd k_mat = -1.0*(R_full + B_full.transpose()*P_val[i]*B_full).colPivHouseholderQr().solve(B_full.transpose()*P_val[i]*A_full);
+
+//         // std::cout << "Check b" << std::endl;
+//         // U_lqr.col(i) = k_mat * X_lqr.col(i);
+
+//         // std::cout << "Check b2" << std::endl;
+//         // X_lqr.col(i+1) = A_full * X_lqr.col(i) + B_full * U_lqr.col(i);
+
+//         // std::cout << "Check c" << std::endl; 
+//         // cost_lqr += X_lqr.col(i).transpose() * Q_full * X_lqr.col(i);
+//         // cost_lqr += U_lqr.col(i).transpose() * R_full * U_lqr.col(i);
+
+// 		MatrixXd k_mat = -1.0*(R_full + B_full.transpose()*P_val[i]*B_full)
+// 			.colPivHouseholderQr().solve(B_full.transpose()*P_val[i]*A_full);
+
+//         // std::cout << k_mat << std::endl;
+
+//         // std::cout << "\n" << std::endl;
+
+//         // std::cout << X_lqr.col(i) << std::endl;
+
+// 		U_lqr.col(i) = k_mat * X_lqr.col(i);
+// 		X_lqr.col(i+1) = A_full * X_lqr.col(i) + B_full * U_lqr.col(i);
+
+// 	 	cost_lqr += X_lqr.col(i).transpose() * Q_full * X_lqr.col(i);
+// 	 	cost_lqr += U_lqr.col(i).transpose() * R_full * U_lqr.col(i);
 
 
-    }
+//     }
 
-    std::cout << "Check 2" << std::endl;
+//     cost_lqr += X_lqr.col(num_timesteps-1).transpose() * Qf_full * X_lqr.col(num_timesteps-1);
 
-    cost_lqr += X_lqr.col(numTimeSteps-1).transpose() * Qf_full * X_lqr.col(numTimeSteps-1);
+//     end = std::chrono::system_clock::now();
 
-    end = std::chrono::system_clock::now();
+//     std::chrono::duration<double> elapsedTime = end - start;
 
-    std::chrono::duration<double> elapsedTime = end - start;
+//     lqrSoln.cost = cost_lqr(0,0);
+//     lqrSoln.controls = U_lqr;
+//     lqrSoln.runtime = elapsedTime.count();
 
-    std::cout << "The DARE Solution Took " << elapsedTime.count() << " seconds\n" << std::endl;
+//     // PrintResultTerminal(lqrSoln);
 
-    std::cout << "DARE Cost: " << cost_lqr(0,0) << std::endl;
+//     // output.push_back(lqrSoln);
 
-    lqrSoln.cost = cost_lqr(0,0);
-    lqrSoln.controls = U_lqr;
-    lqrSoln.runtime = elapsedTime.count();
+//     matrixToOutput(lqrSoln, X_lqr);
 
-    std::cout << "before matrix out" << std::endl;
+//     return lqrSoln;
+// }
 
-    matrixToOutput(lqrSoln, X_lqr);
+// // Data Manipulation
+// void LqrSolver::matrixToOutput(SolverOutput& soln, const MatrixXd& X_mat)
+// {
+//     for (int i1=0; i1 < num_timesteps; i1++){
 
-    std::cout << "after matrix out" << std::endl;
+//         for (int i2=0; i2 < num_nodes; i2++){
+//             soln.states(i2, i1) = (gtsam::Vector(1) << X_mat(i2, i1)).finished();
+//         }
+//     }
 
-    return lqrSoln;
-}
+//     return;
 
-// Data Manipulation
-void FGSolver::matrixToOutput(SolverOutput& soln, const MatrixXd& X_mat)
-{
-    for (int i1=0; i1 < numTimeSteps; i1++){
-
-        for (int i2=0; i2 < numNodes; i2++){
-            soln.states(i2, i1) = (gtsam::Vector(1) << X_mat(i2, i1)).finished();
-        }
-    }
-
-    return;
-
-}
+// }

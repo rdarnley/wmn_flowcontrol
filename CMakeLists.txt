@@ -23,11 +23,17 @@ find_package(PkgConfig)
 pkg_check_modules(YAMLCPP REQUIRED yaml-cpp>=0.5)
 
 # Add Executables
-add_executable(wmn_sim src/wmn_sim.cpp src/factors.cpp src/solver.cpp)
-target_link_libraries(wmn_sim gtsam ${YAMLCPP_LIBRARIES}) # python2.7 ${PYTHON_LIBRARIES})
+##add_executable(wmn_sim src/wmn_sim.cpp src/factors.cpp src/solver.cpp)
+##target_link_libraries(wmn_sim gtsam ${YAMLCPP_LIBRARIES}) # python2.7 ${PYTHON_LIBRARIES})
 
-add_executable(sim src/sim.cpp src/solve.cpp src/factor.cpp)
-target_link_libraries(sim gtsam ${YAMLCPP_LIBRARIES}) # python2.7 ${PYTHON_LIBRARIES})
+##add_executable(sim src/sim.cpp src/solve.cpp src/factor.cpp)
+##target_link_libraries(sim gtsam ${YAMLCPP_LIBRARIES}) # python2.7 ${PYTHON_LIBRARIES})
+
+##add_executable(simulation src/simulation.cpp)
+##target_link_libraries(simulation gtsam ${YAMLCPP_LIBRARIES})
+
+add_executable(centralized src/centralized_main.cpp src/centralized.cpp src/solver.cpp src/factor.cpp)
+target_link_libraries(centralized gtsam ${YAMLCPP_LIBRARIES})
 
 find_package(kindr)
 include_directories(${kindr_INCLUDE_DIRS})
