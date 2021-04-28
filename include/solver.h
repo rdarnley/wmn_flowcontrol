@@ -174,6 +174,10 @@ class LqrSolver {
         noiseModel::Diagonal::shared_ptr prior_noise;
         noiseModel::Diagonal::shared_ptr dyn_noise;
 
+		// noiseModel::Gaussian::shared_ptr state_cost_node;
+		// noiseModel::Gaussian::shared_ptr statef_cost_node;
+		// noiseModel::Gaussian::shared_ptr control_cost_node;
+
         gtsam::Vector prior_state;
         gtsam::Vector final_state;
 

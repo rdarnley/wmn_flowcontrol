@@ -70,25 +70,18 @@ void CentralizedSimulator::Run(SimulationEnvironment env, int experiment_type, i
     // Create Scenario
     solver.Init<SimulationEnvironment>(env);
 
-    // Iterate Over Different Node Conditions
-    // for (int i1=0; i1<(sizeof(num_nodes_array)/sizeof(num_nodes_array[0])); i1++) {
+    solver.CreateScenario(num_nodes, num_control, ss_size, queue_init, rate_init, queue_final, rate_final);
 
-        solver.CreateScenario(num_nodes, num_control, ss_size, queue_init, rate_init, queue_final, rate_final);
-        // solver.CreateScenario(num_nodes_array[i1], num_control_array[i1], 2*num_nodes_array[i1], queue_init, rate_init, queue_final, rate_final);
+    // Solve FG
+    outputs.push_back(solver.SolveFG(0));
 
-        // Solve FG
-        // outputs.push_back(solver.SolveFG(0));
+    // Solve DARE
+    // outputs.push_back(solver.SolveDARE());
 
-        // Solve DARE
-        // outputs.push_back(solver.SolveDARE());
-
-        // Solve CT
-        // outputs.push_back(solver.SolveCT<ss_size, num_control>());
-
-    // }
+    // Solve CT
+    // outputs.push_back(solver.SolveCT<ss_size, num_control>());
 
     // Print Results To Terminal
-    // PrintResultTerminal<SolverOutput>(outputs);
     PrintResultTerminal(outputs);
 
     std::cout << "Exited Run Function" << std::endl;
