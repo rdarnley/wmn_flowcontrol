@@ -86,68 +86,70 @@ class LqrSolver {
 
         SolverOutput SolveDARE();
 
+		void SolvePartial();
+
         template<int stateSpaceSize, int numControlCT>
-	SolverOutput SolveCT(){
+		SolverOutput SolveCT(){
 
-		/**** Control toolbox for benchmarking ****/
-	  MatrixXd X_stacked = MatrixXd::Zero(stateSpaceSize, num_timesteps);
-	  MatrixXd U_stacked = MatrixXd::Zero(numControlCT, num_timesteps-1);
+			/**** Control toolbox for benchmarking ****/
+		MatrixXd X_stacked = MatrixXd::Zero(stateSpaceSize, num_timesteps);
+		MatrixXd U_stacked = MatrixXd::Zero(numControlCT, num_timesteps-1);
 
-	  shared_ptr<ct::optcon::TermQuadratic<stateSpaceSize, numControlCT>> intermCost(
-	  	new ct::optcon::TermQuadratic<stateSpaceSize, numControlCT>(Q_full, R_full));
+		shared_ptr<ct::optcon::TermQuadratic<stateSpaceSize, numControlCT>> intermCost(
+			new ct::optcon::TermQuadratic<stateSpaceSize, numControlCT>(Q_full, R_full));
 
-	  shared_ptr<ct::optcon::TermQuadratic<stateSpaceSize, numControlCT>> finCost(
-	  	new ct::optcon::TermQuadratic<stateSpaceSize, numControlCT>(Qf_full, R_full));
+		shared_ptr<ct::optcon::TermQuadratic<stateSpaceSize, numControlCT>> finCost(
+			new ct::optcon::TermQuadratic<stateSpaceSize, numControlCT>(Qf_full, R_full));
 
-	  shared_ptr<ct::optcon::CostFunctionQuadratic<stateSpaceSize, numControlCT>> quadraticCost(
-	  	new ct::optcon::CostFunctionAnalytical<stateSpaceSize, numControlCT>());
+		shared_ptr<ct::optcon::CostFunctionQuadratic<stateSpaceSize, numControlCT>> quadraticCost(
+			new ct::optcon::CostFunctionAnalytical<stateSpaceSize, numControlCT>());
 
-	  quadraticCost->addIntermediateTerm(intermCost);
-	  quadraticCost->addFinalTerm(finCost);
+		quadraticCost->addIntermediateTerm(intermCost);
+		quadraticCost->addFinalTerm(finCost);
 
-	  std::chrono::time_point<std::chrono::system_clock> start, end;
-	  start = std::chrono::system_clock::now(); 
+		std::chrono::time_point<std::chrono::system_clock> start, end;
+		start = std::chrono::system_clock::now(); 
 
-	  ct::optcon::FHDTLQR<stateSpaceSize, numControlCT> lqrSolver(quadraticCost);
-	  ct::core::FeedbackArray<stateSpaceSize, numControlCT> K_ct;
+		ct::optcon::FHDTLQR<stateSpaceSize, numControlCT> lqrSolver(quadraticCost);
+		ct::core::FeedbackArray<stateSpaceSize, numControlCT> K_ct;
 
-	  ct::core::StateVectorArray<stateSpaceSize> x_ref_init(num_timesteps, 
-	    	ct::core::StateVector<stateSpaceSize>::Zero() );
+		ct::core::StateVectorArray<stateSpaceSize> x_ref_init(num_timesteps, 
+				ct::core::StateVector<stateSpaceSize>::Zero() );
 
-	  ct::core::ControlVectorArray<numControlCT> u0_ff(num_timesteps-1, ct::core::ControlVector<numControlCT>::Zero());
+		ct::core::ControlVectorArray<numControlCT> u0_ff(num_timesteps-1, ct::core::ControlVector<numControlCT>::Zero());
 
-	  ct::core::StateMatrix<stateSpaceSize> A_ct(A_full);
-	  ct::core::StateMatrixArray<stateSpaceSize> A_ct_vec(num_timesteps-1, A_ct);
-	  ct::core::StateControlMatrix<stateSpaceSize, numControlCT> B_ct(B_full);
-	  ct::core::StateControlMatrixArray<stateSpaceSize, numControlCT> B_ct_vec(num_timesteps-1, B_ct);
+		ct::core::StateMatrix<stateSpaceSize> A_ct(A_full);
+		ct::core::StateMatrixArray<stateSpaceSize> A_ct_vec(num_timesteps-1, A_ct);
+		ct::core::StateControlMatrix<stateSpaceSize, numControlCT> B_ct(B_full);
+		ct::core::StateControlMatrixArray<stateSpaceSize, numControlCT> B_ct_vec(num_timesteps-1, B_ct);
 
-	  lqrSolver.designController( x_ref_init, u0_ff, A_ct_vec, B_ct_vec, 0.05, K_ct);
-	  end = std::chrono::system_clock::now();
-	  std::chrono::duration<double> elapsed_seconds = end - start; 
+		lqrSolver.designController( x_ref_init, u0_ff, A_ct_vec, B_ct_vec, 0.05, K_ct);
+		end = std::chrono::system_clock::now();
+		std::chrono::duration<double> elapsed_seconds = end - start; 
 
-	  SolverOutput ctSoln(num_nodes, num_timesteps, numControlCT);
-	  ctSoln.runtime = elapsed_seconds.count();
-	  ctSoln.solverType = "Control Toolbox";
+		SolverOutput ctSoln(num_nodes, num_timesteps, numControlCT);
+		ctSoln.runtime = elapsed_seconds.count();
+		ctSoln.solverType = "Control Toolbox";
 
-	  X_stacked.col(0) = X_init;
-	  MatrixXd cost_ct = MatrixXd::Zero(1,1);
-	  for(int i1=0; i1<num_timesteps-1; i1++){
+		X_stacked.col(0) = X_init;
+		MatrixXd cost_ct = MatrixXd::Zero(1,1);
+		for(int i1=0; i1<num_timesteps-1; i1++){
 
-	  	U_stacked.col(i1) = K_ct[i1] * X_stacked.col(i1);
-			X_stacked.col(i1+1) = A_full * X_stacked.col(i1) + B_full * U_stacked.col(i1);
+			U_stacked.col(i1) = K_ct[i1] * X_stacked.col(i1);
+				X_stacked.col(i1+1) = A_full * X_stacked.col(i1) + B_full * U_stacked.col(i1);
 
-			cost_ct += X_stacked.col(i1).transpose() * Q_full * X_stacked.col(i1);
-			cost_ct += U_stacked.col(i1).transpose() * R_full * U_stacked.col(i1);		
+				cost_ct += X_stacked.col(i1).transpose() * Q_full * X_stacked.col(i1);
+				cost_ct += U_stacked.col(i1).transpose() * R_full * U_stacked.col(i1);		
 
-	  }
-	  cost_ct += X_stacked.col(num_timesteps-1).transpose() * Qf_full * X_stacked.col(num_timesteps-1);
-	  ctSoln.cost = cost_ct(0,0);  
+		}
+		cost_ct += X_stacked.col(num_timesteps-1).transpose() * Qf_full * X_stacked.col(num_timesteps-1);
+		ctSoln.cost = cost_ct(0,0);  
 
-	  ctSoln.controls = U_stacked;
-	  matrixToOutput(ctSoln, X_stacked);
+		ctSoln.controls = U_stacked;
+		matrixToOutput(ctSoln, X_stacked);
 
-	  return ctSoln;
-	}
+		return ctSoln;
+		}
 
     private:
 
@@ -187,6 +189,10 @@ class LqrSolver {
         gtsam::Ordering order;
         // NonlinearFactorGraph graph;
         GaussianFactorGraph graph;
+
+		// std::pair< boost::shared_ptr<typename gtsam::EliminateableFactorGraph<gtsam::FactorGraph>::BayesNetType>. boost::shared_ptr<gtsam::FactorGraph>> pairing;
+
+		std::pair< boost::shared_ptr< gtsam::GaussianBayesNet >, boost::shared_ptr< gtsam::GaussianFactorGraph > > pairing;
 
         Values initialEstimate;
 

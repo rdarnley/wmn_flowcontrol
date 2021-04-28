@@ -139,7 +139,7 @@ void LqrSolver::CreateScenario(int num_nodes_, int num_control_, int state_space
                     terms.push_back(std::make_pair(X[i2][i1], a_end));
                     terms.push_back(std::make_pair(U[controlIdx][i1], b));
                     terms.push_back(std::make_pair(X[i2][i1+1], -gtsam::Matrix::Identity(2,2)));
-                    // graph.add(terms, gtsam::Matrix::Zero(2,1), dyn_noise);
+                    graph.add(terms, gtsam::Matrix::Zero(2,1), dyn_noise);
                 } else if(!applyControl) {
                     graph.add(X[i2-1][i1], a, X[i2][i1], a_end, X[i2][i1+1], -gtsam::Matrix::Identity(2,2), gtsam::Matrix::Zero(2,1), dyn_noise);
                 } else {
@@ -159,19 +159,22 @@ void LqrSolver::CreateScenario(int num_nodes_, int num_control_, int state_space
     qfmat_node = Qf_node.array().matrix().asDiagonal();
     rmat = R.array().matrix().asDiagonal();
 
-    // auto state_cost_node = noiseModel::Gaussian::Information(qmat_node);
-    // auto statef_cost_node = noiseModel::Gaussian::Information(qfmat_node);
-    // auto control_cost_node = noiseModel::Gaussian::Information(rmat);
+    // noiseModel::Diagonal::shared_ptr state_cost_node = noiseModel::Gaussian::Information(qmat_node);
+    // noiseModel::Diagonal::shared_ptr statef_cost_node = noiseModel::Gaussian::Information(qfmat_node);
+    // noiseModel::Diagonal::shared_ptr control_cost_node = noiseModel::Gaussian::Information(rmat);
 
-    noiseModel::Diagonal::shared_ptr state_cost_node = noiseModel::Diagonal::Sigmas(Q_node);
-    noiseModel::Diagonal::shared_ptr statef_cost_node = noiseModel::Diagonal::Sigmas(Qf_node);
-    noiseModel::Diagonal::shared_ptr control_cost_node = noiseModel::Diagonal::Sigmas(R);
+    noiseModel::Diagonal::shared_ptr state_cost_node = noiseModel::Diagonal::Variances(Q_node);
+    noiseModel::Diagonal::shared_ptr statef_cost_node = noiseModel::Diagonal::Variances(Qf_node);
+    noiseModel::Diagonal::shared_ptr control_cost_node = noiseModel::Diagonal::Variances(R);
 
     for(int i=0; i<num_nodes; i++){
         for(int j=0; j<num_timesteps; j++) {
             if(j==num_timesteps - 1){
                 // graph.add(GaussianFactor<gtsam::Vector>(X[i][j], final_state, statef_cost_node));
                 graph.add(X[i][j], gtsam::Matrix::Identity(2,2), final_state, statef_cost_node);
+
+                // graph.add(X[i][j], gtsam::Matrix::Identity(2,2), final_state, noiseModel::Diagonal::Information(qmat_node));
+
 
             } else {
                 // graph.add(GaussianFactor<gtsam::Vector>(X[i][j], final_state, state_cost_node));
@@ -207,7 +210,22 @@ SolverOutput LqrSolver::SolveFG(int orderingType) {
 
     // Optimize Factor Graph
     // Values resultLQR = optimizer.optimize();
-    VectorValues resultLQR = graph.optimize();
+    // VectorValues resultLQR = graph.optimize();
+
+    for(int i1=0; i1<num_timesteps; i1++){
+        order.push_back(X[num_nodes-1][i1]);
+    }
+    pairing = graph.eliminatePartialSequential(order);
+
+    VectorValues resultLQR = pairing.second->optimize();
+
+    VectorValues resultBayes = pairing.first->optimize(resultLQR);
+
+    std::cout << "Size of result LQR: " << resultLQR.size() << std::endl;
+
+    std::cout << "Size of result bayes: " << resultBayes.size() << std::endl;
+
+    std::cout << "Finished Optimization" << std::endl;
 
     // End Timer
     end = std::chrono::system_clock::now();
@@ -227,13 +245,12 @@ SolverOutput LqrSolver::SolveFG(int orderingType) {
         // Add Costs For States
         for(int i2=0; i2 < num_nodes; i2++) {
 
-    //         fgSoln.states(i2, i1) = ( gtsam::Vector(1) << resultLQR.at<VectorXd>(X[i2][i1])(0) ).finished();
-            fgSoln.states(i2,i1) = ( gtsam::Vector(1) << resultLQR.at(X[i2][i1])(0) ).finished();
+            fgSoln.states(i2,i1) = ( gtsam::Vector(2) << resultBayes.at(X[i2][i1])(0), resultBayes.at(X[i2][i1])(1) ).finished();
 
             if (i1 < num_timesteps - 1){
-                cost_fg += pow(fgSoln.states(i2,i1)(0),2.)*Q_node(0);
+                cost_fg += pow(fgSoln.states(i2,i1)(0),2.)*Q_node(0) + pow(fgSoln.states(i2,i1)(1), 2.)*Q_node(1);
             } else {
-                cost_fg += pow(fgSoln.states(i2,i1)(0),2.)*Qf_node(0);
+                cost_fg += pow(fgSoln.states(i2,i1)(0),2.)*Qf_node(0) + pow(fgSoln.states(i2,i1)(1), 2.)*Qf_node(1);
             }
 
         }
@@ -242,7 +259,7 @@ SolverOutput LqrSolver::SolveFG(int orderingType) {
         if(i1 < num_timesteps - 1) {
             for(int i4=0; i4<num_control; i4++) {
 
-                fgSoln.controls(i4, i1) = resultLQR.at(U[i4][i1])(0);
+                fgSoln.controls(i4, i1) = resultBayes.at(U[i4][i1])(0);
                 cost_fg += pow(fgSoln.controls(i4,i1),2.)*R_full(i4,i4);
             } 
         }
@@ -255,6 +272,7 @@ SolverOutput LqrSolver::SolveFG(int orderingType) {
 
     return fgSoln;
 }
+
 
 
 // SolverOutput FGSolver::FGSim(const SolverOutput& fgSoln)
@@ -287,94 +305,94 @@ SolverOutput LqrSolver::SolveFG(int orderingType) {
 //     return fgsimSoln;
 // }
 
-// // Ricatti Equation To Solve LQR Problem
-// SolverOutput LqrSolver::SolveDARE()
-// {
-//     std::cout << "Entered DARE Solve" << std::endl;
+// Ricatti Equation To Solve LQR Problem
+SolverOutput LqrSolver::SolveDARE()
+{
+    std::cout << "Entered DARE Solve" << std::endl;
 
-//     vector<MatrixXd> P_val(num_timesteps, Qf_full);
-//     MatrixXd X_lqr = MatrixXd::Zero(state_space * num_nodes, num_timesteps);
-//     MatrixXd U_lqr = MatrixXd::Zero(num_control, num_timesteps-1);
-//     MatrixXd cost_lqr = MatrixXd::Zero(1,1);
+    vector<MatrixXd> P_val(num_timesteps, Qf_full);
+    MatrixXd X_lqr = MatrixXd::Zero(state_space * num_nodes, num_timesteps);
+    MatrixXd U_lqr = MatrixXd::Zero(num_control, num_timesteps-1);
+    MatrixXd cost_lqr = MatrixXd::Zero(1,1);
 
-//     SolverOutput lqrSoln(num_nodes, num_timesteps, num_control);
-//     lqrSoln.solverType = "DARE";
+    SolverOutput lqrSoln(num_nodes, num_timesteps, num_control);
+    lqrSoln.solverType = "DARE";
 
-//     std::chrono::time_point<std::chrono::system_clock> start, end;
-//     start = std::chrono::system_clock::now();
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    start = std::chrono::system_clock::now();
 
-//     // Backward Pass With Ricatti
-//     for (int i=num_timesteps-1; i>0; i--) {
-//         P_val[i-1] = Q_full + A_full.transpose()*P_val[i]*A_full - 
-//         A_full.transpose()*P_val[i]*B_full*(R_full + B_full.transpose()*
-//         P_val[i]*B_full).colPivHouseholderQr().solve(B_full.transpose()*P_val[i]*A_full);
-//     }
+    // Backward Pass With Ricatti
+    for (int i=num_timesteps-1; i>0; i--) {
+        P_val[i-1] = Q_full + A_full.transpose()*P_val[i]*A_full - 
+        A_full.transpose()*P_val[i]*B_full*(R_full + B_full.transpose()*
+        P_val[i]*B_full).colPivHouseholderQr().solve(B_full.transpose()*P_val[i]*A_full);
+    }
 
-//     // Forward Pass
-//     X_lqr.col(0) = X_init;
+    // Forward Pass
+    X_lqr.col(0) = X_init;
 
-//     for (int i=0; i<num_timesteps-1; i++) {
+    for (int i=0; i<num_timesteps-1; i++) {
 
-//         // std::cout << "Check a" << std::endl;
-//         // MatrixXd k_mat = -1.0*(R_full + B_full.transpose()*P_val[i]*B_full).colPivHouseholderQr().solve(B_full.transpose()*P_val[i]*A_full);
+        // std::cout << "Check a" << std::endl;
+        // MatrixXd k_mat = -1.0*(R_full + B_full.transpose()*P_val[i]*B_full).colPivHouseholderQr().solve(B_full.transpose()*P_val[i]*A_full);
 
-//         // std::cout << "Check b" << std::endl;
-//         // U_lqr.col(i) = k_mat * X_lqr.col(i);
+        // std::cout << "Check b" << std::endl;
+        // U_lqr.col(i) = k_mat * X_lqr.col(i);
 
-//         // std::cout << "Check b2" << std::endl;
-//         // X_lqr.col(i+1) = A_full * X_lqr.col(i) + B_full * U_lqr.col(i);
+        // std::cout << "Check b2" << std::endl;
+        // X_lqr.col(i+1) = A_full * X_lqr.col(i) + B_full * U_lqr.col(i);
 
-//         // std::cout << "Check c" << std::endl; 
-//         // cost_lqr += X_lqr.col(i).transpose() * Q_full * X_lqr.col(i);
-//         // cost_lqr += U_lqr.col(i).transpose() * R_full * U_lqr.col(i);
+        // std::cout << "Check c" << std::endl; 
+        // cost_lqr += X_lqr.col(i).transpose() * Q_full * X_lqr.col(i);
+        // cost_lqr += U_lqr.col(i).transpose() * R_full * U_lqr.col(i);
 
-// 		MatrixXd k_mat = -1.0*(R_full + B_full.transpose()*P_val[i]*B_full)
-// 			.colPivHouseholderQr().solve(B_full.transpose()*P_val[i]*A_full);
+		MatrixXd k_mat = -1.0*(R_full + B_full.transpose()*P_val[i]*B_full)
+			.colPivHouseholderQr().solve(B_full.transpose()*P_val[i]*A_full);
 
-//         // std::cout << k_mat << std::endl;
+        // std::cout << k_mat << std::endl;
 
-//         // std::cout << "\n" << std::endl;
+        // std::cout << "\n" << std::endl;
 
-//         // std::cout << X_lqr.col(i) << std::endl;
+        // std::cout << X_lqr.col(i) << std::endl;
 
-// 		U_lqr.col(i) = k_mat * X_lqr.col(i);
-// 		X_lqr.col(i+1) = A_full * X_lqr.col(i) + B_full * U_lqr.col(i);
+		U_lqr.col(i) = k_mat * X_lqr.col(i);
+		X_lqr.col(i+1) = A_full * X_lqr.col(i) + B_full * U_lqr.col(i);
 
-// 	 	cost_lqr += X_lqr.col(i).transpose() * Q_full * X_lqr.col(i);
-// 	 	cost_lqr += U_lqr.col(i).transpose() * R_full * U_lqr.col(i);
+	 	cost_lqr += X_lqr.col(i).transpose() * Q_full * X_lqr.col(i);
+	 	cost_lqr += U_lqr.col(i).transpose() * R_full * U_lqr.col(i);
 
 
-//     }
+    }
 
-//     cost_lqr += X_lqr.col(num_timesteps-1).transpose() * Qf_full * X_lqr.col(num_timesteps-1);
+    cost_lqr += X_lqr.col(num_timesteps-1).transpose() * Qf_full * X_lqr.col(num_timesteps-1);
 
-//     end = std::chrono::system_clock::now();
+    end = std::chrono::system_clock::now();
 
-//     std::chrono::duration<double> elapsedTime = end - start;
+    std::chrono::duration<double> elapsedTime = end - start;
 
-//     lqrSoln.cost = cost_lqr(0,0);
-//     lqrSoln.controls = U_lqr;
-//     lqrSoln.runtime = elapsedTime.count();
+    lqrSoln.cost = cost_lqr(0,0);
+    lqrSoln.controls = U_lqr;
+    lqrSoln.runtime = elapsedTime.count();
 
-//     // PrintResultTerminal(lqrSoln);
+    // PrintResultTerminal(lqrSoln);
 
-//     // output.push_back(lqrSoln);
+    // output.push_back(lqrSoln);
 
-//     matrixToOutput(lqrSoln, X_lqr);
+    matrixToOutput(lqrSoln, X_lqr);
 
-//     return lqrSoln;
-// }
+    return lqrSoln;
+}
 
-// // Data Manipulation
-// void LqrSolver::matrixToOutput(SolverOutput& soln, const MatrixXd& X_mat)
-// {
-//     for (int i1=0; i1 < num_timesteps; i1++){
+// Data Manipulation
+void LqrSolver::matrixToOutput(SolverOutput& soln, const MatrixXd& X_mat)
+{
+    for (int i1=0; i1 < num_timesteps; i1++){
 
-//         for (int i2=0; i2 < num_nodes; i2++){
-//             soln.states(i2, i1) = (gtsam::Vector(1) << X_mat(i2, i1)).finished();
-//         }
-//     }
+        for (int i2=0; i2 < num_nodes; i2++){
+            soln.states(i2, i1) = (gtsam::Vector(1) << X_mat(i2, i1)).finished();
+        }
+    }
 
-//     return;
+    return;
 
-// }
+}
