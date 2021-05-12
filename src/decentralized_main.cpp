@@ -15,6 +15,11 @@ int main(const int argc, const char* argv[]){
 
 // class Node
 
+/// ID
+/// Location
+/// Neighbors
+/// Comms Capacity
+
 //// Identity neighbors --> have established convention as to direction of traffic flow
 
 //// Create Local FG

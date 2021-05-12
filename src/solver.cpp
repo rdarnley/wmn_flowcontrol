@@ -210,22 +210,22 @@ SolverOutput LqrSolver::SolveFG(int orderingType) {
 
     // Optimize Factor Graph
     // Values resultLQR = optimizer.optimize();
-    // VectorValues resultLQR = graph.optimize();
+    VectorValues resultLQR = graph.optimize();
 
-    for(int i1=0; i1<num_timesteps; i1++){
-        order.push_back(X[num_nodes-1][i1]);
-    }
-    pairing = graph.eliminatePartialSequential(order);
+    // for(int i1=0; i1<num_timesteps; i1++){
+    //     order.push_back(X[num_nodes-1][i1]);
+    // }
+    // pairing = graph.eliminatePartialSequential(order);
 
-    VectorValues resultLQR = pairing.second->optimize();
+    // VectorValues resultLQR = pairing.second->optimize();
 
-    VectorValues resultBayes = pairing.first->optimize(resultLQR);
+    // VectorValues resultBayes = pairing.first->optimize(resultLQR);
 
-    std::cout << "Size of result LQR: " << resultLQR.size() << std::endl;
+    // std::cout << "Size of result LQR: " << resultLQR.size() << std::endl;
 
-    std::cout << "Size of result bayes: " << resultBayes.size() << std::endl;
+    // std::cout << "Size of result bayes: " << resultBayes.size() << std::endl;
 
-    std::cout << "Finished Optimization" << std::endl;
+    // std::cout << "Finished Optimization" << std::endl;
 
     // End Timer
     end = std::chrono::system_clock::now();
@@ -245,7 +245,7 @@ SolverOutput LqrSolver::SolveFG(int orderingType) {
         // Add Costs For States
         for(int i2=0; i2 < num_nodes; i2++) {
 
-            fgSoln.states(i2,i1) = ( gtsam::Vector(2) << resultBayes.at(X[i2][i1])(0), resultBayes.at(X[i2][i1])(1) ).finished();
+            fgSoln.states(i2,i1) = ( gtsam::Vector(2) << resultLQR.at(X[i2][i1])(0), resultLQR.at(X[i2][i1])(1) ).finished();
 
             if (i1 < num_timesteps - 1){
                 cost_fg += pow(fgSoln.states(i2,i1)(0),2.)*Q_node(0) + pow(fgSoln.states(i2,i1)(1), 2.)*Q_node(1);
@@ -259,7 +259,7 @@ SolverOutput LqrSolver::SolveFG(int orderingType) {
         if(i1 < num_timesteps - 1) {
             for(int i4=0; i4<num_control; i4++) {
 
-                fgSoln.controls(i4, i1) = resultBayes.at(U[i4][i1])(0);
+                fgSoln.controls(i4, i1) = resultLQR.at(U[i4][i1])(0);
                 cost_fg += pow(fgSoln.controls(i4,i1),2.)*R_full(i4,i4);
             } 
         }

@@ -123,6 +123,19 @@ centralized/fast:
 	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/build
 .PHONY : centralized/fast
 
+#=============================================================================
+# Target rules for targets named decentralized
+
+# Build rule for target.
+decentralized: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 decentralized
+.PHONY : decentralized
+
+# fast build rule for target.
+decentralized/fast:
+	$(MAKE) -f CMakeFiles/decentralized.dir/build.make CMakeFiles/decentralized.dir/build
+.PHONY : decentralized/fast
+
 src/centralized.o: src/centralized.cpp.o
 
 .PHONY : src/centralized.o
@@ -177,6 +190,60 @@ src/centralized_main.cpp.s:
 	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/centralized_main.cpp.s
 .PHONY : src/centralized_main.cpp.s
 
+src/decentralized.o: src/decentralized.cpp.o
+
+.PHONY : src/decentralized.o
+
+# target to build an object file
+src/decentralized.cpp.o:
+	$(MAKE) -f CMakeFiles/decentralized.dir/build.make CMakeFiles/decentralized.dir/src/decentralized.cpp.o
+.PHONY : src/decentralized.cpp.o
+
+src/decentralized.i: src/decentralized.cpp.i
+
+.PHONY : src/decentralized.i
+
+# target to preprocess a source file
+src/decentralized.cpp.i:
+	$(MAKE) -f CMakeFiles/decentralized.dir/build.make CMakeFiles/decentralized.dir/src/decentralized.cpp.i
+.PHONY : src/decentralized.cpp.i
+
+src/decentralized.s: src/decentralized.cpp.s
+
+.PHONY : src/decentralized.s
+
+# target to generate assembly for a file
+src/decentralized.cpp.s:
+	$(MAKE) -f CMakeFiles/decentralized.dir/build.make CMakeFiles/decentralized.dir/src/decentralized.cpp.s
+.PHONY : src/decentralized.cpp.s
+
+src/decentralized_main.o: src/decentralized_main.cpp.o
+
+.PHONY : src/decentralized_main.o
+
+# target to build an object file
+src/decentralized_main.cpp.o:
+	$(MAKE) -f CMakeFiles/decentralized.dir/build.make CMakeFiles/decentralized.dir/src/decentralized_main.cpp.o
+.PHONY : src/decentralized_main.cpp.o
+
+src/decentralized_main.i: src/decentralized_main.cpp.i
+
+.PHONY : src/decentralized_main.i
+
+# target to preprocess a source file
+src/decentralized_main.cpp.i:
+	$(MAKE) -f CMakeFiles/decentralized.dir/build.make CMakeFiles/decentralized.dir/src/decentralized_main.cpp.i
+.PHONY : src/decentralized_main.cpp.i
+
+src/decentralized_main.s: src/decentralized_main.cpp.s
+
+.PHONY : src/decentralized_main.s
+
+# target to generate assembly for a file
+src/decentralized_main.cpp.s:
+	$(MAKE) -f CMakeFiles/decentralized.dir/build.make CMakeFiles/decentralized.dir/src/decentralized_main.cpp.s
+.PHONY : src/decentralized_main.cpp.s
+
 src/factor.o: src/factor.cpp.o
 
 .PHONY : src/factor.o
@@ -184,6 +251,7 @@ src/factor.o: src/factor.cpp.o
 # target to build an object file
 src/factor.cpp.o:
 	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/factor.cpp.o
+	$(MAKE) -f CMakeFiles/decentralized.dir/build.make CMakeFiles/decentralized.dir/src/factor.cpp.o
 .PHONY : src/factor.cpp.o
 
 src/factor.i: src/factor.cpp.i
@@ -193,6 +261,7 @@ src/factor.i: src/factor.cpp.i
 # target to preprocess a source file
 src/factor.cpp.i:
 	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/factor.cpp.i
+	$(MAKE) -f CMakeFiles/decentralized.dir/build.make CMakeFiles/decentralized.dir/src/factor.cpp.i
 .PHONY : src/factor.cpp.i
 
 src/factor.s: src/factor.cpp.s
@@ -202,6 +271,7 @@ src/factor.s: src/factor.cpp.s
 # target to generate assembly for a file
 src/factor.cpp.s:
 	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/factor.cpp.s
+	$(MAKE) -f CMakeFiles/decentralized.dir/build.make CMakeFiles/decentralized.dir/src/factor.cpp.s
 .PHONY : src/factor.cpp.s
 
 src/solver.o: src/solver.cpp.o
@@ -238,14 +308,21 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... rebuild_cache"
-	@echo "... centralized"
 	@echo "... edit_cache"
+	@echo "... centralized"
+	@echo "... decentralized"
 	@echo "... src/centralized.o"
 	@echo "... src/centralized.i"
 	@echo "... src/centralized.s"
 	@echo "... src/centralized_main.o"
 	@echo "... src/centralized_main.i"
 	@echo "... src/centralized_main.s"
+	@echo "... src/decentralized.o"
+	@echo "... src/decentralized.i"
+	@echo "... src/decentralized.s"
+	@echo "... src/decentralized_main.o"
+	@echo "... src/decentralized_main.i"
+	@echo "... src/decentralized_main.s"
 	@echo "... src/factor.o"
 	@echo "... src/factor.i"
 	@echo "... src/factor.s"

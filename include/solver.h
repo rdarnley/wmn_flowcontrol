@@ -185,6 +185,8 @@ class LqrSolver {
 
         vector<vector<Key>> X;
         vector<vector<Key>> U;
+		// std::map<int, vector<Key>> X;
+		// std::map<int, vector<Key>> U;
 
         gtsam::Ordering order;
         // NonlinearFactorGraph graph;

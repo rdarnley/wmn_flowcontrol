@@ -97,6 +97,43 @@ clean: CMakeFiles/centralized.dir/clean
 .PHONY : clean
 
 #=============================================================================
+# Target rules for target CMakeFiles/decentralized.dir
+
+# All Build rule for target.
+CMakeFiles/decentralized.dir/all:
+	$(MAKE) -f CMakeFiles/decentralized.dir/build.make CMakeFiles/decentralized.dir/depend
+	$(MAKE) -f CMakeFiles/decentralized.dir/build.make CMakeFiles/decentralized.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ryan/wmn_flowcontrol/build/CMakeFiles --progress-num=6,7,8,9 "Built target decentralized"
+.PHONY : CMakeFiles/decentralized.dir/all
+
+# Include target in all.
+all: CMakeFiles/decentralized.dir/all
+
+.PHONY : all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/decentralized.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ryan/wmn_flowcontrol/build/CMakeFiles 4
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/decentralized.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ryan/wmn_flowcontrol/build/CMakeFiles 0
+.PHONY : CMakeFiles/decentralized.dir/rule
+
+# Convenience name for target.
+decentralized: CMakeFiles/decentralized.dir/rule
+
+.PHONY : decentralized
+
+# clean rule for target.
+CMakeFiles/decentralized.dir/clean:
+	$(MAKE) -f CMakeFiles/decentralized.dir/build.make CMakeFiles/decentralized.dir/clean
+.PHONY : CMakeFiles/decentralized.dir/clean
+
+# clean rule for target.
+clean: CMakeFiles/decentralized.dir/clean
+
+.PHONY : clean
+
+#=============================================================================
 # Special targets to cleanup operation of make.
 
 # Special rule to run CMake to check the build system integrity.

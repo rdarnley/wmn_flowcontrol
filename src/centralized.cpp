@@ -59,8 +59,8 @@ void CentralizedSimulator::Run(SimulationEnvironment env, int experiment_type, i
 
     std::cout << "Entered Run Function" << std::endl;    
 
-    const int num_nodes = 50;
-    const int num_control = 25;
+    const int num_nodes = 30;
+    const int num_control = 30;
     const int ss_size = 2 * num_nodes;
 
     // Create LQR Solver Instance

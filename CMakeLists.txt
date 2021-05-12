@@ -35,6 +35,9 @@ pkg_check_modules(YAMLCPP REQUIRED yaml-cpp>=0.5)
 add_executable(centralized src/centralized_main.cpp src/centralized.cpp src/solver.cpp src/factor.cpp)
 target_link_libraries(centralized gtsam ${YAMLCPP_LIBRARIES})
 
+add_executable(decentralized src/decentralized_main.cpp src/decentralized.cpp src/factor.cpp)
+target_link_libraries(decentralized gtsam ${YAMLCPP_LIBRARIES})
+
 find_package(kindr)
 include_directories(${kindr_INCLUDE_DIRS})
 
