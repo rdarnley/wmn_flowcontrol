@@ -77,8 +77,14 @@ void LqrSolver::CreateLqrFg(WirelessNetwork& network){
                 // Verify Node Is "Farther" From Sink Than Current Node
                 if(distance_sink < network.map_of_nodes[idx].distance_to_sink){
                     terms.push_back(std::make_pair(X[idx][i], a));
+                
+                    std::cout << "Adding Node " << idx << " to Node " << node_id << " dynamics" << std::endl;
+                    std::cout << "Distance To Sink : " << distance_sink << std::endl;
+                    std::cout << "Longer Distance : " << network.map_of_nodes[idx].distance_to_sink << std::endl;
+                
                 }
             }
+
             terms.push_back(std::make_pair(X[node_id][i], a_end));
 
             if(controllable){
@@ -112,10 +118,13 @@ void LqrSolver::CreateLqrFg(WirelessNetwork& network){
                 graph.add(U[node_id][j], gtsam::Matrix::Identity(1,1), gtsam::Matrix::Zero(1,1), control_cost_node);
             }
         }
-
         graph.add(X[node_id][num_timesteps-1], gtsam::Matrix::Identity(2,2), final_state, statef_cost_node);
 
     }
+
+    //
+    graph.print();
+    //
 
     return;
 
