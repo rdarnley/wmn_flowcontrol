@@ -189,6 +189,9 @@ void LqrSolver::CreateScenario(int num_nodes_, int num_control_, int state_space
             graph.add(U[i][j], gtsam::Matrix::Identity(1,1), gtsam::Matrix::Zero(1,1), control_cost_node);
         }
     }
+
+    graph.print();
+
     return;   
 }
 
