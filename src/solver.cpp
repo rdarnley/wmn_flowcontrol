@@ -150,18 +150,22 @@ void LqrSolver::CreateScenario(int num_nodes_, int num_control_, int state_space
         } // end inner/temporal for loop
     } // end outer for loop
 
-    Q_node = gtsam::Vector(state_space); Q_node << state_cost, state_cost;
-    Qf_node = gtsam::Vector(state_space); Qf_node << statef_cost, statef_cost;
+    Q_node = gtsam::Vector(state_space); Q_node << 1.0/state_cost, 1.0/state_cost;
+    Qf_node = gtsam::Vector(state_space); Qf_node << 1.0/statef_cost, 1.0/statef_cost;
 
-    R = gtsam::Vector(1); R << control_cost;
+    R = gtsam::Vector(1); R << 1.0/control_cost;
 
     qmat_node = Q_node.array().matrix().asDiagonal();
     qfmat_node = Qf_node.array().matrix().asDiagonal();
     rmat = R.array().matrix().asDiagonal();
 
-    // noiseModel::Diagonal::shared_ptr state_cost_node = noiseModel::Gaussian::Information(qmat_node);
-    // noiseModel::Diagonal::shared_ptr statef_cost_node = noiseModel::Gaussian::Information(qfmat_node);
-    // noiseModel::Diagonal::shared_ptr control_cost_node = noiseModel::Gaussian::Information(rmat);
+    // noiseModel::Diagonal::shared_ptr state_cost_node = noiseModel::Gaussian::Information(qmat_node, true);
+    // noiseModel::Diagonal::shared_ptr statef_cost_node = noiseModel::Gaussian::Information(qfmat_node, true);
+    // noiseModel::Diagonal::shared_ptr control_cost_node = noiseModel::Gaussian::Information(rmat, true);
+
+    // noiseModel::Gaussian::shared_ptr no = noiseModel::Gaussian::Information(1.0/rmat);
+    // std::cout << no->sigmas() << std::endl;
+    // no->print("hi");
 
     noiseModel::Diagonal::shared_ptr state_cost_node = noiseModel::Diagonal::Variances(Q_node);
     noiseModel::Diagonal::shared_ptr statef_cost_node = noiseModel::Diagonal::Variances(Qf_node);
@@ -251,9 +255,9 @@ SolverOutput LqrSolver::SolveFG(int orderingType) {
             fgSoln.states(i2,i1) = ( gtsam::Vector(2) << resultLQR.at(X[i2][i1])(0), resultLQR.at(X[i2][i1])(1) ).finished();
 
             if (i1 < num_timesteps - 1){
-                cost_fg += pow(fgSoln.states(i2,i1)(0),2.)*Q_node(0) + pow(fgSoln.states(i2,i1)(1), 2.)*Q_node(1);
+                cost_fg += pow(fgSoln.states(i2,i1)(0),2.)*(1.0/Q_node(0)) + pow(fgSoln.states(i2,i1)(1), 2.)*(1.0/Q_node(1));
             } else {
-                cost_fg += pow(fgSoln.states(i2,i1)(0),2.)*Qf_node(0) + pow(fgSoln.states(i2,i1)(1), 2.)*Qf_node(1);
+                cost_fg += pow(fgSoln.states(i2,i1)(0),2.)*(1.0/Qf_node(0)) + pow(fgSoln.states(i2,i1)(1), 2.)*(1.0/Qf_node(1));
             }
 
         }

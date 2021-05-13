@@ -1,14 +1,14 @@
-num_timesteps: 20
+num_timesteps: 150
 timestep: 0.05
 
-queue_init: 20
-rate_init: 5
+queue_init: 40
+rate_init: 1
 
-queue_final: 10
-rate_final: 5
+queue_final: 0
+rate_final: 0
 
-state_cost: 5
-statef_cost: 20
+state_cost: 10
+statef_cost: 100
 control_cost: 1
 
 experiment_type: 1
