@@ -111,195 +111,98 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named centralized
+# Target rules for targets named lqr_comparison
 
 # Build rule for target.
-centralized: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 centralized
-.PHONY : centralized
+lqr_comparison: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 lqr_comparison
+.PHONY : lqr_comparison
 
 # fast build rule for target.
-centralized/fast:
-	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/build
-.PHONY : centralized/fast
+lqr_comparison/fast:
+	$(MAKE) -f CMakeFiles/lqr_comparison.dir/build.make CMakeFiles/lqr_comparison.dir/build
+.PHONY : lqr_comparison/fast
 
-#=============================================================================
-# Target rules for targets named decentralized
+src/lqr.o: src/lqr.cpp.o
 
-# Build rule for target.
-decentralized: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 decentralized
-.PHONY : decentralized
-
-# fast build rule for target.
-decentralized/fast:
-	$(MAKE) -f CMakeFiles/decentralized.dir/build.make CMakeFiles/decentralized.dir/build
-.PHONY : decentralized/fast
-
-src/centralized.o: src/centralized.cpp.o
-
-.PHONY : src/centralized.o
+.PHONY : src/lqr.o
 
 # target to build an object file
-src/centralized.cpp.o:
-	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/centralized.cpp.o
-.PHONY : src/centralized.cpp.o
+src/lqr.cpp.o:
+	$(MAKE) -f CMakeFiles/lqr_comparison.dir/build.make CMakeFiles/lqr_comparison.dir/src/lqr.cpp.o
+.PHONY : src/lqr.cpp.o
 
-src/centralized.i: src/centralized.cpp.i
+src/lqr.i: src/lqr.cpp.i
 
-.PHONY : src/centralized.i
+.PHONY : src/lqr.i
 
 # target to preprocess a source file
-src/centralized.cpp.i:
-	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/centralized.cpp.i
-.PHONY : src/centralized.cpp.i
+src/lqr.cpp.i:
+	$(MAKE) -f CMakeFiles/lqr_comparison.dir/build.make CMakeFiles/lqr_comparison.dir/src/lqr.cpp.i
+.PHONY : src/lqr.cpp.i
 
-src/centralized.s: src/centralized.cpp.s
+src/lqr.s: src/lqr.cpp.s
 
-.PHONY : src/centralized.s
+.PHONY : src/lqr.s
 
 # target to generate assembly for a file
-src/centralized.cpp.s:
-	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/centralized.cpp.s
-.PHONY : src/centralized.cpp.s
+src/lqr.cpp.s:
+	$(MAKE) -f CMakeFiles/lqr_comparison.dir/build.make CMakeFiles/lqr_comparison.dir/src/lqr.cpp.s
+.PHONY : src/lqr.cpp.s
 
-src/centralized_main.o: src/centralized_main.cpp.o
+src/lqr_comparison.o: src/lqr_comparison.cpp.o
 
-.PHONY : src/centralized_main.o
+.PHONY : src/lqr_comparison.o
 
 # target to build an object file
-src/centralized_main.cpp.o:
-	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/centralized_main.cpp.o
-.PHONY : src/centralized_main.cpp.o
+src/lqr_comparison.cpp.o:
+	$(MAKE) -f CMakeFiles/lqr_comparison.dir/build.make CMakeFiles/lqr_comparison.dir/src/lqr_comparison.cpp.o
+.PHONY : src/lqr_comparison.cpp.o
 
-src/centralized_main.i: src/centralized_main.cpp.i
+src/lqr_comparison.i: src/lqr_comparison.cpp.i
 
-.PHONY : src/centralized_main.i
+.PHONY : src/lqr_comparison.i
 
 # target to preprocess a source file
-src/centralized_main.cpp.i:
-	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/centralized_main.cpp.i
-.PHONY : src/centralized_main.cpp.i
+src/lqr_comparison.cpp.i:
+	$(MAKE) -f CMakeFiles/lqr_comparison.dir/build.make CMakeFiles/lqr_comparison.dir/src/lqr_comparison.cpp.i
+.PHONY : src/lqr_comparison.cpp.i
 
-src/centralized_main.s: src/centralized_main.cpp.s
+src/lqr_comparison.s: src/lqr_comparison.cpp.s
 
-.PHONY : src/centralized_main.s
+.PHONY : src/lqr_comparison.s
 
 # target to generate assembly for a file
-src/centralized_main.cpp.s:
-	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/centralized_main.cpp.s
-.PHONY : src/centralized_main.cpp.s
+src/lqr_comparison.cpp.s:
+	$(MAKE) -f CMakeFiles/lqr_comparison.dir/build.make CMakeFiles/lqr_comparison.dir/src/lqr_comparison.cpp.s
+.PHONY : src/lqr_comparison.cpp.s
 
-src/decentralized.o: src/decentralized.cpp.o
+src/network_utils.o: src/network_utils.cpp.o
 
-.PHONY : src/decentralized.o
+.PHONY : src/network_utils.o
 
 # target to build an object file
-src/decentralized.cpp.o:
-	$(MAKE) -f CMakeFiles/decentralized.dir/build.make CMakeFiles/decentralized.dir/src/decentralized.cpp.o
-.PHONY : src/decentralized.cpp.o
+src/network_utils.cpp.o:
+	$(MAKE) -f CMakeFiles/lqr_comparison.dir/build.make CMakeFiles/lqr_comparison.dir/src/network_utils.cpp.o
+.PHONY : src/network_utils.cpp.o
 
-src/decentralized.i: src/decentralized.cpp.i
+src/network_utils.i: src/network_utils.cpp.i
 
-.PHONY : src/decentralized.i
-
-# target to preprocess a source file
-src/decentralized.cpp.i:
-	$(MAKE) -f CMakeFiles/decentralized.dir/build.make CMakeFiles/decentralized.dir/src/decentralized.cpp.i
-.PHONY : src/decentralized.cpp.i
-
-src/decentralized.s: src/decentralized.cpp.s
-
-.PHONY : src/decentralized.s
-
-# target to generate assembly for a file
-src/decentralized.cpp.s:
-	$(MAKE) -f CMakeFiles/decentralized.dir/build.make CMakeFiles/decentralized.dir/src/decentralized.cpp.s
-.PHONY : src/decentralized.cpp.s
-
-src/decentralized_main.o: src/decentralized_main.cpp.o
-
-.PHONY : src/decentralized_main.o
-
-# target to build an object file
-src/decentralized_main.cpp.o:
-	$(MAKE) -f CMakeFiles/decentralized.dir/build.make CMakeFiles/decentralized.dir/src/decentralized_main.cpp.o
-.PHONY : src/decentralized_main.cpp.o
-
-src/decentralized_main.i: src/decentralized_main.cpp.i
-
-.PHONY : src/decentralized_main.i
+.PHONY : src/network_utils.i
 
 # target to preprocess a source file
-src/decentralized_main.cpp.i:
-	$(MAKE) -f CMakeFiles/decentralized.dir/build.make CMakeFiles/decentralized.dir/src/decentralized_main.cpp.i
-.PHONY : src/decentralized_main.cpp.i
+src/network_utils.cpp.i:
+	$(MAKE) -f CMakeFiles/lqr_comparison.dir/build.make CMakeFiles/lqr_comparison.dir/src/network_utils.cpp.i
+.PHONY : src/network_utils.cpp.i
 
-src/decentralized_main.s: src/decentralized_main.cpp.s
+src/network_utils.s: src/network_utils.cpp.s
 
-.PHONY : src/decentralized_main.s
-
-# target to generate assembly for a file
-src/decentralized_main.cpp.s:
-	$(MAKE) -f CMakeFiles/decentralized.dir/build.make CMakeFiles/decentralized.dir/src/decentralized_main.cpp.s
-.PHONY : src/decentralized_main.cpp.s
-
-src/factor.o: src/factor.cpp.o
-
-.PHONY : src/factor.o
-
-# target to build an object file
-src/factor.cpp.o:
-	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/factor.cpp.o
-	$(MAKE) -f CMakeFiles/decentralized.dir/build.make CMakeFiles/decentralized.dir/src/factor.cpp.o
-.PHONY : src/factor.cpp.o
-
-src/factor.i: src/factor.cpp.i
-
-.PHONY : src/factor.i
-
-# target to preprocess a source file
-src/factor.cpp.i:
-	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/factor.cpp.i
-	$(MAKE) -f CMakeFiles/decentralized.dir/build.make CMakeFiles/decentralized.dir/src/factor.cpp.i
-.PHONY : src/factor.cpp.i
-
-src/factor.s: src/factor.cpp.s
-
-.PHONY : src/factor.s
+.PHONY : src/network_utils.s
 
 # target to generate assembly for a file
-src/factor.cpp.s:
-	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/factor.cpp.s
-	$(MAKE) -f CMakeFiles/decentralized.dir/build.make CMakeFiles/decentralized.dir/src/factor.cpp.s
-.PHONY : src/factor.cpp.s
-
-src/solver.o: src/solver.cpp.o
-
-.PHONY : src/solver.o
-
-# target to build an object file
-src/solver.cpp.o:
-	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/solver.cpp.o
-.PHONY : src/solver.cpp.o
-
-src/solver.i: src/solver.cpp.i
-
-.PHONY : src/solver.i
-
-# target to preprocess a source file
-src/solver.cpp.i:
-	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/solver.cpp.i
-.PHONY : src/solver.cpp.i
-
-src/solver.s: src/solver.cpp.s
-
-.PHONY : src/solver.s
-
-# target to generate assembly for a file
-src/solver.cpp.s:
-	$(MAKE) -f CMakeFiles/centralized.dir/build.make CMakeFiles/centralized.dir/src/solver.cpp.s
-.PHONY : src/solver.cpp.s
+src/network_utils.cpp.s:
+	$(MAKE) -f CMakeFiles/lqr_comparison.dir/build.make CMakeFiles/lqr_comparison.dir/src/network_utils.cpp.s
+.PHONY : src/network_utils.cpp.s
 
 # Help Target
 help:
@@ -308,27 +211,17 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... rebuild_cache"
+	@echo "... lqr_comparison"
 	@echo "... edit_cache"
-	@echo "... centralized"
-	@echo "... decentralized"
-	@echo "... src/centralized.o"
-	@echo "... src/centralized.i"
-	@echo "... src/centralized.s"
-	@echo "... src/centralized_main.o"
-	@echo "... src/centralized_main.i"
-	@echo "... src/centralized_main.s"
-	@echo "... src/decentralized.o"
-	@echo "... src/decentralized.i"
-	@echo "... src/decentralized.s"
-	@echo "... src/decentralized_main.o"
-	@echo "... src/decentralized_main.i"
-	@echo "... src/decentralized_main.s"
-	@echo "... src/factor.o"
-	@echo "... src/factor.i"
-	@echo "... src/factor.s"
-	@echo "... src/solver.o"
-	@echo "... src/solver.i"
-	@echo "... src/solver.s"
+	@echo "... src/lqr.o"
+	@echo "... src/lqr.i"
+	@echo "... src/lqr.s"
+	@echo "... src/lqr_comparison.o"
+	@echo "... src/lqr_comparison.i"
+	@echo "... src/lqr_comparison.s"
+	@echo "... src/network_utils.o"
+	@echo "... src/network_utils.i"
+	@echo "... src/network_utils.s"
 .PHONY : help
 
 

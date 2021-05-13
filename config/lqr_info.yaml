@@ -1,0 +1,14 @@
+num_timesteps: 20
+timestep: 0.05
+
+queue_init: 20
+rate_init: 5
+
+queue_final: 10
+rate_final: 5
+
+state_cost: 5
+statef_cost: 20
+control_cost: 1
+
+experiment_type: 1
