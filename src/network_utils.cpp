@@ -64,6 +64,8 @@ void WirelessNode::Mesh(std::map<int, WirelessNode> &map_of_nodes){
 WirelessNetwork::WirelessNetwork(YAML::Node node_topology_){
 
     node_topology = node_topology_;
+    num_nodes = 0;
+    num_control = 0;
 
 } // end Constructor
 
@@ -91,6 +93,12 @@ void WirelessNetwork::MeshNodes(){
         n.Mesh(map_of_nodes);
 
         map_of_nodes[id] = n;
+
+        num_nodes++;
+
+        if(controllable){
+            num_control++;
+        }
     
     }
 

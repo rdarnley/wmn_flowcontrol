@@ -39,6 +39,8 @@ class WirelessNetwork{
     public:
 
         std::map<int, WirelessNode> map_of_nodes;
+        int num_nodes;
+        int num_control;
 
         WirelessNetwork(){};
         WirelessNetwork(YAML::Node node_topology_);

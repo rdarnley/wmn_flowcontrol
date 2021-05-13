@@ -73,8 +73,6 @@ map
 -
 factor.h
 ../include/factor.h
-iostream
--
 Eigen/Dense
 -
 stdio.h
@@ -82,8 +80,6 @@ stdio.h
 math.h
 -
 cmath
--
-vector
 -
 algorithm
 -

@@ -6,9 +6,6 @@
 #include <yaml-cpp/yaml.h>
 #include <iostream>
 
-// #include "solver.h"
-// #include "node.h"
-
 
 #include <utility>
 #include <vector>
@@ -16,12 +13,10 @@
 
 #include "factor.h"
 
-#include <iostream>
 #include <Eigen/Dense>
 #include <stdio.h> 
 #include <math.h>  
 #include <cmath>
-#include <vector>
 #include <algorithm>
 
 using namespace Eigen;
@@ -77,14 +72,16 @@ class LqrSolver{
     public:
 
         LqrSolver(){}
-        LqrSolver(YAML::Node lqr_info);
+        LqrSolver(YAML::Node lqr_info, WirelessNetwork network_);
 
-        void CreateLqrFg(WirelessNetwork& network);
-        void SolveLqrFg(WirelessNetwork& network);
+        void CreateLqrFg();
+        void SolveLqrFg();
         void LqrMatrix();
         void LqrCt();
 
     private:
+
+        WirelessNetwork network;
 
         int num_timesteps;
         double timestep;
@@ -114,8 +111,6 @@ class LqrSolver{
         gtsam::Vector R_node;
 
         MatrixXd A_full, B_full, Q_full, Qf_full, R_full, X_init;
-
-
 
 };
 

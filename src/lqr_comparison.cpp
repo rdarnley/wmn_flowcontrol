@@ -27,16 +27,16 @@ int main(const int argc, const char* argv[]){
     YAML::Node lqr_info = YAML::LoadFile("../config/lqr_info.yaml");
 
     // Create Instance Of LqrSolvers
-    LqrSolver solver(lqr_info);
+    LqrSolver solver(lqr_info, network);
 
     // Create LQR FG
-    solver.CreateLqrFg(network);
+    solver.CreateLqrFg();
 
     // Solve LQR FG
-    solver.SolveLqrFg(network);
+    solver.SolveLqrFg();
 
-    // // Create + Solve Matrix Math LQR
-    // solver.LqrMatrix();
+    // Create + Solve Matrix Math LQR
+    solver.LqrMatrix();
 
     // // Create + Solve Control Toolbox LQR
     // solver.LqrCt();

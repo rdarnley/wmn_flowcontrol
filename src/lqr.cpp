@@ -7,7 +7,9 @@
 
 #include "lqr.h"
 
-LqrSolver::LqrSolver(YAML::Node lqr_info){
+LqrSolver::LqrSolver(YAML::Node lqr_info, WirelessNetwork network_){
+
+    network = network_;
 
     num_timesteps = lqr_info["num_timesteps"].as<int>();
     timestep = lqr_info["timestep"].as<double>();
@@ -23,13 +25,16 @@ LqrSolver::LqrSolver(YAML::Node lqr_info){
 
 } // end Constructor
 
-void LqrSolver::CreateLqrFg(WirelessNetwork& network){
+void LqrSolver::CreateLqrFg(){
 
     int state_space = 2;
 
     // Set Start And Goal States
     prior_state = gtsam::Vector(state_space); prior_state << queue_init, rate_init;
     final_state = gtsam::Vector(state_space); final_state << queue_final, rate_final; 
+
+    prior_noise = noiseModel::Constrained::All(state_space);
+    dyn_noise = noiseModel::Constrained::All(state_space);
 
     // Initialize Factor Graph
     graph = GaussianFactorGraph();
@@ -130,7 +135,7 @@ void LqrSolver::CreateLqrFg(WirelessNetwork& network){
 
 } // end CreateLqrFg()
 
-void LqrSolver::SolveLqrFg(WirelessNetwork& network){
+void LqrSolver::SolveLqrFg(){
 
     std::cout << "Entered SolveLqrFg" << std::endl;
 
@@ -184,3 +189,158 @@ void LqrSolver::SolveLqrFg(WirelessNetwork& network){
     return;
 
 } // end SolveLqrFg()
+
+void LqrSolver::LqrMatrix(){
+
+    int state_space = 2;
+    int num_nodes = network.num_nodes;
+    int num_control = network.num_control;
+
+    int control_counter = 0;
+
+    std::cout << "1" << std::endl;
+
+    // Initialize Full Matrices
+    A_full = MatrixXd::Zero(state_space * num_nodes, state_space * num_nodes);
+    B_full = MatrixXd::Zero(state_space * num_nodes, num_control);
+    Q_full = MatrixXd::Zero(state_space * num_nodes, state_space * num_nodes);
+    Qf_full = MatrixXd::Zero(state_space * num_nodes, state_space * num_nodes);
+    R_full = MatrixXd::Zero(num_control, num_control);
+
+    X_init = MatrixXd::Zero(state_space * num_nodes, 1);
+
+    for(int i = 0; i < num_nodes; i++) {
+        X_init(2*i, 0) = queue_init;
+        X_init(2*i+1,0) = rate_init;
+    }
+
+    std::cout << "2" << std::endl;
+
+
+    // Iterate Across Nodes
+    for(auto& n : network.map_of_nodes){
+
+        int node_id = n.first;
+        int matrix_id = node_id - 1;
+        bool controllable = n.second.controllable;
+        int distance_sink = n.second.distance_to_sink;
+        std::vector<int> adjacent_nodes = n.second.neighbor_ids;
+
+        std::cout << "3" << std::endl;
+
+
+        // Iterate Through Neighbors
+        for(int idx : adjacent_nodes){
+
+            std::cout << "4" << std::endl;
+
+
+            // Verify Node Is "Farther" From Sink Than Current Node
+            if(distance_sink < network.map_of_nodes[idx].distance_to_sink){
+            
+                int other_matrix_id = idx - 1;
+
+                MatrixXd a = MatrixXd::Zero(1,1); a << 1;
+                A_full.block<1,1>(state_space * matrix_id, state_space*other_matrix_id+1) = a;                            
+            }
+        }
+
+        std::cout << "5" << std::endl;
+
+
+        // Add Self-Dynamics
+        MatrixXd a = MatrixXd::Zero(2,2); a << 1, -1, 0, 1;
+        A_full.block<2,2>(2*matrix_id, 2*matrix_id) = a;
+
+        // Add Control
+        if(controllable){
+            MatrixXd b = MatrixXd::Zero(1,1); b << 1;
+            B_full.block<1,1>(2*matrix_id+1, control_counter) = b;
+            
+            R_full(control_counter, control_counter) = control_cost;
+
+            control_counter++;
+        }
+
+        // Fill Q Matrix
+        Q_full(2*matrix_id, 2*matrix_id) = state_cost;
+        Q_full(2*matrix_id+1, 2*matrix_id+1) = state_cost;
+        Qf_full(2*matrix_id, 2*matrix_id) = statef_cost;
+        Qf_full(2*matrix_id+1, 2*matrix_id+1) = statef_cost;
+
+    }
+
+    // Solve
+
+    std::cout << "6" << std::endl;
+
+
+    vector<MatrixXd> P_val(num_timesteps, Qf_full);
+    MatrixXd X_lqr = MatrixXd::Zero(state_space * num_nodes, num_timesteps);
+    MatrixXd U_lqr = MatrixXd::Zero(num_control, num_timesteps-1);
+    MatrixXd cost_lqr = MatrixXd::Zero(1,1);
+
+    SolverOutput lqrSoln(num_nodes, num_timesteps, num_control);
+    lqrSoln.solverType = "DARE";
+
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    start = std::chrono::system_clock::now();
+
+    // Backward Pass With Ricatti
+    for (int i=num_timesteps-1; i>0; i--) {
+        P_val[i-1] = Q_full + A_full.transpose()*P_val[i]*A_full - 
+        A_full.transpose()*P_val[i]*B_full*(R_full + B_full.transpose()*
+        P_val[i]*B_full).colPivHouseholderQr().solve(B_full.transpose()*P_val[i]*A_full);
+    }
+
+    // Forward Pass
+    X_lqr.col(0) = X_init;
+
+    for (int i=0; i<num_timesteps-1; i++) {
+
+        // std::cout << "Check a" << std::endl;
+        // MatrixXd k_mat = -1.0*(R_full + B_full.transpose()*P_val[i]*B_full).colPivHouseholderQr().solve(B_full.transpose()*P_val[i]*A_full);
+
+        // std::cout << "Check b" << std::endl;
+        // U_lqr.col(i) = k_mat * X_lqr.col(i);
+
+        // std::cout << "Check b2" << std::endl;
+        // X_lqr.col(i+1) = A_full * X_lqr.col(i) + B_full * U_lqr.col(i);
+
+        // std::cout << "Check c" << std::endl; 
+        // cost_lqr += X_lqr.col(i).transpose() * Q_full * X_lqr.col(i);
+        // cost_lqr += U_lqr.col(i).transpose() * R_full * U_lqr.col(i);
+
+		MatrixXd k_mat = -1.0*(R_full + B_full.transpose()*P_val[i]*B_full)
+			.colPivHouseholderQr().solve(B_full.transpose()*P_val[i]*A_full);
+
+        // std::cout << k_mat << std::endl;
+
+        // std::cout << "\n" << std::endl;
+
+        // std::cout << X_lqr.col(i) << std::endl;
+
+		U_lqr.col(i) = k_mat * X_lqr.col(i);
+		X_lqr.col(i+1) = A_full * X_lqr.col(i) + B_full * U_lqr.col(i);
+
+	 	cost_lqr += X_lqr.col(i).transpose() * Q_full * X_lqr.col(i);
+	 	cost_lqr += U_lqr.col(i).transpose() * R_full * U_lqr.col(i);
+
+
+    }
+
+    cost_lqr += X_lqr.col(num_timesteps-1).transpose() * Qf_full * X_lqr.col(num_timesteps-1);
+
+    end = std::chrono::system_clock::now();
+
+    std::chrono::duration<double> elapsedTime = end - start;
+
+    lqrSoln.cost = cost_lqr(0,0);
+    lqrSoln.controls = U_lqr;
+    lqrSoln.runtime = elapsedTime.count();
+
+    std::cout << "Cost : " << cost_lqr(0,0);
+
+    return;
+
+}
