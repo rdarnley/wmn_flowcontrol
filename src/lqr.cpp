@@ -7,9 +7,9 @@
 
 #include "lqr.h"
 
-LqrSolver::LqrSolver(YAML::Node lqr_info, WirelessNetwork network_){
+LqrSolver::LqrSolver(YAML::Node lqr_info){ //, WirelessNetwork network_){
 
-    network = network_;
+    // network = network_;
 
     num_timesteps = lqr_info["num_timesteps"].as<int>();
     timestep = lqr_info["timestep"].as<double>();
@@ -83,10 +83,6 @@ void LqrSolver::CreateLqrFg(){
                 if(distance_sink < network.map_of_nodes[idx].distance_to_sink){
                     terms.push_back(std::make_pair(X[idx][i], a));
                 
-                    std::cout << "Adding Node " << idx << " to Node " << node_id << " dynamics" << std::endl;
-                    std::cout << "Distance To Sink : " << distance_sink << std::endl;
-                    std::cout << "Longer Distance : " << network.map_of_nodes[idx].distance_to_sink << std::endl;
-                
                 }
             }
 
@@ -103,9 +99,9 @@ void LqrSolver::CreateLqrFg(){
         } // end temporal loop
     } // end spatial loop
 
-    Q_node = gtsam::Vector(state_space); Q_node << state_cost, state_cost;
-    Qf_node = gtsam::Vector(state_space); Qf_node << statef_cost, statef_cost;
-    R_node = gtsam::Vector(1); R_node << control_cost;
+    Q_node = gtsam::Vector(state_space); Q_node << 1.0/state_cost, 1.0/state_cost;
+    Qf_node = gtsam::Vector(state_space); Qf_node << 1.0/statef_cost, 1.0/statef_cost;
+    R_node = gtsam::Vector(1); R_node << 1.0/control_cost;
 
     noiseModel::Diagonal::shared_ptr state_cost_node = noiseModel::Diagonal::Variances(Q_node);
     noiseModel::Diagonal::shared_ptr statef_cost_node = noiseModel::Diagonal::Variances(Qf_node);
@@ -127,15 +123,11 @@ void LqrSolver::CreateLqrFg(){
 
     }
 
-    //
-    graph.print();
-    //
-
     return;
 
 } // end CreateLqrFg()
 
-void LqrSolver::SolveLqrFg(){
+SolverOutput LqrSolver::SolveLqrFg(){
 
     std::cout << "Entered SolveLqrFg" << std::endl;
 
@@ -149,7 +141,7 @@ void LqrSolver::SolveLqrFg(){
     end = std::chrono::system_clock::now();
     std::chrono::duration<double> duration = end - start;
 
-    SolverOutput fgSoln(10, num_timesteps, 10);
+    SolverOutput fgSoln(network.num_nodes, num_timesteps, network.num_control);
     fgSoln.runtime = duration.count();
     fgSoln.solverType = "Factor Graph";
     fgSoln.num_timesteps = num_timesteps;
@@ -167,15 +159,15 @@ void LqrSolver::SolveLqrFg(){
 
             if(i < num_timesteps - 1){
 
-                cost += pow(fgSoln.states(node_id-1, i)(0),2.)*Q_node(0) + pow(fgSoln.states(node_id-1, i)(1), 2.)*Q_node(1);
+                cost += pow(fgSoln.states(node_id-1, i)(0),2.)*state_cost + pow(fgSoln.states(node_id-1, i)(1), 2.)*state_cost;
 
                 if(controllable){
                     fgSoln.controls(node_id-1, i) = resultLqr.at(U[node_id][i])(0);
-                    cost += pow(fgSoln.controls(node_id-1, i),2.)*R_node(0);
+                    cost += pow(fgSoln.controls(node_id-1, i),2.)*control_cost;
                 } 
 
             } else {
-                cost += pow(fgSoln.states(node_id-1, i)(0),2.)*Qf_node(0) + pow(fgSoln.states(node_id-1,i)(1),2.)*Qf_node(1);
+                cost += pow(fgSoln.states(node_id-1, i)(0),2.)*statef_cost + pow(fgSoln.states(node_id-1,i)(1),2.)*statef_cost;
             }
 
         }
@@ -184,21 +176,17 @@ void LqrSolver::SolveLqrFg(){
 
     fgSoln.cost = cost;
 
-    std::cout << "Cost : " << cost << std::endl;
-
-    return;
+    return fgSoln;
 
 } // end SolveLqrFg()
 
-void LqrSolver::LqrMatrix(){
+SolverOutput LqrSolver::LqrMatrix(){
 
     int state_space = 2;
     int num_nodes = network.num_nodes;
     int num_control = network.num_control;
 
     int control_counter = 0;
-
-    std::cout << "1" << std::endl;
 
     // Initialize Full Matrices
     A_full = MatrixXd::Zero(state_space * num_nodes, state_space * num_nodes);
@@ -214,9 +202,6 @@ void LqrSolver::LqrMatrix(){
         X_init(2*i+1,0) = rate_init;
     }
 
-    std::cout << "2" << std::endl;
-
-
     // Iterate Across Nodes
     for(auto& n : network.map_of_nodes){
 
@@ -226,14 +211,8 @@ void LqrSolver::LqrMatrix(){
         int distance_sink = n.second.distance_to_sink;
         std::vector<int> adjacent_nodes = n.second.neighbor_ids;
 
-        std::cout << "3" << std::endl;
-
-
         // Iterate Through Neighbors
         for(int idx : adjacent_nodes){
-
-            std::cout << "4" << std::endl;
-
 
             // Verify Node Is "Farther" From Sink Than Current Node
             if(distance_sink < network.map_of_nodes[idx].distance_to_sink){
@@ -244,9 +223,6 @@ void LqrSolver::LqrMatrix(){
                 A_full.block<1,1>(state_space * matrix_id, state_space*other_matrix_id+1) = a;                            
             }
         }
-
-        std::cout << "5" << std::endl;
-
 
         // Add Self-Dynamics
         MatrixXd a = MatrixXd::Zero(2,2); a << 1, -1, 0, 1;
@@ -271,9 +247,6 @@ void LqrSolver::LqrMatrix(){
     }
 
     // Solve
-
-    std::cout << "6" << std::endl;
-
 
     vector<MatrixXd> P_val(num_timesteps, Qf_full);
     MatrixXd X_lqr = MatrixXd::Zero(state_space * num_nodes, num_timesteps);
@@ -339,8 +312,8 @@ void LqrSolver::LqrMatrix(){
     lqrSoln.controls = U_lqr;
     lqrSoln.runtime = elapsedTime.count();
 
-    std::cout << "Cost : " << cost_lqr(0,0);
-
-    return;
+    return lqrSoln;
 
 }
+
+/////

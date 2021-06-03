@@ -21,7 +21,7 @@ CentralizedSimulator::CentralizedSimulator(){
     // Load YAML File
     std::cout << "Parsing Input" << std::endl;
 
-    YAML::Node config = YAML::LoadFile("../config/config.yaml");
+    YAML::Node config = YAML::LoadFile("../config/lqr_info.yaml");
 
     // Dynamics Information
     const int num_timesteps = config["num_timesteps"].as<int>();
@@ -39,7 +39,7 @@ CentralizedSimulator::CentralizedSimulator(){
     const int rate_final = config["rate_final"].as<int>();
 
     // Experiment Information
-    const int experiment_type = config["experiment_type"].as<int>();
+    // const int experiment_type = config["experiment_type"].as<int>();
 
     // Create Simulation Environment
     SimulationEnvironment env = SimulationEnvironment(  num_timesteps, 
@@ -47,7 +47,7 @@ CentralizedSimulator::CentralizedSimulator(){
                                                         control_cost    );
             
     // Create Simulations / Solve Simulations
-    this->Run<SimulationEnvironment>(env, experiment_type, queue_init, rate_init, queue_final, rate_final);
+    this->Run<SimulationEnvironment>(env, 0, queue_init, rate_init, queue_final, rate_final);
 
 }
 //// End Constructor
@@ -59,8 +59,8 @@ void CentralizedSimulator::Run(SimulationEnvironment env, int experiment_type, i
 
     std::cout << "Entered Run Function" << std::endl;    
 
-    const int num_nodes = 10;
-    const int num_control = 10;
+    const int num_nodes = 3;
+    const int num_control = 3;
     const int ss_size = 2 * num_nodes;
 
     // Create LQR Solver Instance

@@ -14,7 +14,7 @@ void DecentralizedSimulator::Init(){
     // Load YAML File
     std::cout << "Parsing Input" << std::endl;
 
-    YAML::Node config = YAML::LoadFile("../config/config.yaml");
+    YAML::Node config = YAML::LoadFile("../config/lqr_info.yaml");
 
     Environment env;
 
@@ -34,8 +34,8 @@ void DecentralizedSimulator::Init(){
     env.rate_final = config["rate_final"].as<int>();
 
     // Experiment Information
-    env.experiment_type = config["experiment_type"].as<int>();
-    env.max_mesh_distance = config["max_mesh_distance"].as<double>();
+    // env.experiment_type = config["experiment_type"].as<int>();
+    // env.max_mesh_distance = config["max_mesh_distance"].as<double>();
 
     this->CreateTopology(env);
 
@@ -48,9 +48,12 @@ void DecentralizedSimulator::CreateTopology(Environment env){
     // Load YAML File
     std::cout << "Parsing Topology Input" << std::endl;
 
-    YAML::Node config_topology = YAML::LoadFile("../config/config_topology.yaml");
-
+    YAML::Node config_topology = YAML::LoadFile("../config/node_topology.yaml");
     YAML::Node nodes = config_topology["Nodes"];
+
+    location sink_location;
+    sink_location.x = config_topology["Sink"][0].as<float>();
+    sink_location.y = config_topology["Sink"][1].as<float>();
 
     std::map<int, WirelessNode> map_of_nodes;
 
@@ -62,9 +65,11 @@ void DecentralizedSimulator::CreateTopology(Environment env){
         
         YAML::Node location_data = it->second;
 
-        WirelessNode n(id, location_data[0].as<float>(), location_data[1].as<float>());
+        float x_loc = location_data[0].as<float>();
+        float y_loc = location_data[1].as<float>();
+        bool controllable = location_data[2].as<bool>();
+        WirelessNode n(id, x_loc, y_loc, controllable, sink_location);
 
-        // n.Mesh(map_of_nodes, env.max_mesh_distance);
         n.Mesh(map_of_nodes);
 
         map_of_nodes[id] = n;
@@ -120,14 +125,10 @@ void DecentralizedSimulator::ForwardPass(Environment env, int id, std::map<int, 
 
     std::cout << "Entered Forward Pass" << std::endl;
 
-    // Iterate over nodes from right to left (do dynamics from lower number to higher number right now)!!!!!!
-    // for (auto iter = map_of_nodes.rbegin(); iter != map_of_nodes.rend(); ++iter){
-    // maybe use recursion not a loop?
-
     // Create Local FG
     map_of_nodes[id].CreateLocalFG(env, map_of_nodes);
 
-    // // Partially Solve Local FG --> Convert To Bayes Net
+    // Partially Solve Local FG --> Convert To Bayes Net
     map_of_nodes[id].ConvertFG();
 
     std::cout << "\n\n\n\n" << std::endl;
@@ -165,7 +166,7 @@ void DecentralizedSimulator::BackwardPass(Environment env, int id, std::map<int,
     }
 
     // Pass To Next Node (If Not End) -- Hardcode Solution Right Now
-    if(id == 30){
+    if(id == 3){
         std::cout << "Display Results Then Done" << std::endl;
         this->DisplayResults(env, map_of_nodes);
         return;
@@ -343,7 +344,7 @@ void WirelessNode::CreateLocalFG(Environment env, std::map<int, WirelessNode>& m
     graph.add(X[starting_index][0], MatrixXd::Identity(2,2), prior_state, prior_noise);
     
     // Add New Constraint From Last FG Solve
-    if(starting_index != 30){
+    if(starting_index != 3){
         graph.add(map_of_nodes[starting_index+1].shared_factor);
     }
 
@@ -384,10 +385,10 @@ void WirelessNode::CreateLocalFG(Environment env, std::map<int, WirelessNode>& m
         } // end inner/temporal for loop
     } // end outer/spatial for loop
 
-    Q_node = gtsam::Vector(state_space); Q_node << state_cost, state_cost;
-    Qf_node = gtsam::Vector(state_space); Qf_node << statef_cost, statef_cost;
+    Q_node = gtsam::Vector(state_space); Q_node << 1.0/state_cost, 1.0/state_cost;
+    Qf_node = gtsam::Vector(state_space); Qf_node << 1.0/statef_cost, 1.0/statef_cost;
 
-    R = gtsam::Vector(1); R << control_cost;
+    R = gtsam::Vector(1); R << 1.0/control_cost;
 
     noiseModel::Diagonal::shared_ptr state_cost_node = noiseModel::Diagonal::Variances(Q_node);
     noiseModel::Diagonal::shared_ptr statef_cost_node = noiseModel::Diagonal::Variances(Qf_node);

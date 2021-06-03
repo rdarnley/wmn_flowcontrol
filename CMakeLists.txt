@@ -38,8 +38,11 @@ pkg_check_modules(YAMLCPP REQUIRED yaml-cpp>=0.5)
 #add_executable(decentralized src/decentralized_main.cpp src/decentralized.cpp src/factor.cpp)
 #target_link_libraries(decentralized gtsam ${YAMLCPP_LIBRARIES})
 
-add_executable(lqr_comparison src/lqr_comparison.cpp src/network_utils.cpp src/lqr.cpp)
-target_link_libraries(lqr_comparison gtsam ${YAMLCPP_LIBRARIES})
+#add_executable(lqr_comparison src/lqr_comparison.cpp src/network_utils.cpp src/lqr.cpp)
+#target_link_libraries(lqr_comparison gtsam ${YAMLCPP_LIBRARIES})
+
+add_executable(main_node src/main.cpp src/network.cpp src/simulator.cpp)
+target_link_libraries(main_node gtsam ${YAMLCPP_LIBRARIES})
 
 find_package(kindr)
 include_directories(${kindr_INCLUDE_DIRS})

@@ -93,7 +93,7 @@ class WirelessNode{
 
         // Constructor
         WirelessNode(){}
-        WirelessNode(int id_, float x_, float y_){
+        WirelessNode(int id_, float x_, float y_, bool controllable, location sink_location){
             id = id_;
             loc.x = x_;
             loc.y = y_;

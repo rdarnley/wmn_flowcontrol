@@ -150,10 +150,10 @@ void LqrSolver::CreateScenario(int num_nodes_, int num_control_, int state_space
         } // end inner/temporal for loop
     } // end outer for loop
 
-    Q_node = gtsam::Vector(state_space); Q_node << state_cost, state_cost;
-    Qf_node = gtsam::Vector(state_space); Qf_node << statef_cost, statef_cost;
+    Q_node = gtsam::Vector(state_space); Q_node << 1.0/state_cost, 1.0/state_cost;
+    Qf_node = gtsam::Vector(state_space); Qf_node << 1.0/statef_cost, 1.0/statef_cost;
 
-    R = gtsam::Vector(1); R << control_cost;
+    R = gtsam::Vector(1); R << 1.0/control_cost;
 
     qmat_node = Q_node.array().matrix().asDiagonal();
     qfmat_node = Qf_node.array().matrix().asDiagonal();
@@ -248,9 +248,9 @@ SolverOutput LqrSolver::SolveFG(int orderingType) {
             fgSoln.states(i2,i1) = ( gtsam::Vector(2) << resultLQR.at(X[i2][i1])(0), resultLQR.at(X[i2][i1])(1) ).finished();
 
             if (i1 < num_timesteps - 1){
-                cost_fg += pow(fgSoln.states(i2,i1)(0),2.)*Q_node(0) + pow(fgSoln.states(i2,i1)(1), 2.)*Q_node(1);
+                cost_fg += pow(fgSoln.states(i2,i1)(0),2.)*state_cost + pow(fgSoln.states(i2,i1)(1), 2.)*state_cost;
             } else {
-                cost_fg += pow(fgSoln.states(i2,i1)(0),2.)*Qf_node(0) + pow(fgSoln.states(i2,i1)(1), 2.)*Qf_node(1);
+                cost_fg += pow(fgSoln.states(i2,i1)(0),2.)*statef_cost + pow(fgSoln.states(i2,i1)(1), 2.)*statef_cost;
             }
 
         }
@@ -260,7 +260,7 @@ SolverOutput LqrSolver::SolveFG(int orderingType) {
             for(int i4=0; i4<num_control; i4++) {
 
                 fgSoln.controls(i4, i1) = resultLQR.at(U[i4][i1])(0);
-                cost_fg += pow(fgSoln.controls(i4,i1),2.)*R_full(i4,i4);
+                cost_fg += pow(fgSoln.controls(i4,i1),2.)*control_cost;
             } 
         }
     }     

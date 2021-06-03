@@ -111,98 +111,98 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named lqr_comparison
+# Target rules for targets named main_node
 
 # Build rule for target.
-lqr_comparison: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 lqr_comparison
-.PHONY : lqr_comparison
+main_node: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 main_node
+.PHONY : main_node
 
 # fast build rule for target.
-lqr_comparison/fast:
-	$(MAKE) -f CMakeFiles/lqr_comparison.dir/build.make CMakeFiles/lqr_comparison.dir/build
-.PHONY : lqr_comparison/fast
+main_node/fast:
+	$(MAKE) -f CMakeFiles/main_node.dir/build.make CMakeFiles/main_node.dir/build
+.PHONY : main_node/fast
 
-src/lqr.o: src/lqr.cpp.o
+src/main.o: src/main.cpp.o
 
-.PHONY : src/lqr.o
-
-# target to build an object file
-src/lqr.cpp.o:
-	$(MAKE) -f CMakeFiles/lqr_comparison.dir/build.make CMakeFiles/lqr_comparison.dir/src/lqr.cpp.o
-.PHONY : src/lqr.cpp.o
-
-src/lqr.i: src/lqr.cpp.i
-
-.PHONY : src/lqr.i
-
-# target to preprocess a source file
-src/lqr.cpp.i:
-	$(MAKE) -f CMakeFiles/lqr_comparison.dir/build.make CMakeFiles/lqr_comparison.dir/src/lqr.cpp.i
-.PHONY : src/lqr.cpp.i
-
-src/lqr.s: src/lqr.cpp.s
-
-.PHONY : src/lqr.s
-
-# target to generate assembly for a file
-src/lqr.cpp.s:
-	$(MAKE) -f CMakeFiles/lqr_comparison.dir/build.make CMakeFiles/lqr_comparison.dir/src/lqr.cpp.s
-.PHONY : src/lqr.cpp.s
-
-src/lqr_comparison.o: src/lqr_comparison.cpp.o
-
-.PHONY : src/lqr_comparison.o
+.PHONY : src/main.o
 
 # target to build an object file
-src/lqr_comparison.cpp.o:
-	$(MAKE) -f CMakeFiles/lqr_comparison.dir/build.make CMakeFiles/lqr_comparison.dir/src/lqr_comparison.cpp.o
-.PHONY : src/lqr_comparison.cpp.o
+src/main.cpp.o:
+	$(MAKE) -f CMakeFiles/main_node.dir/build.make CMakeFiles/main_node.dir/src/main.cpp.o
+.PHONY : src/main.cpp.o
 
-src/lqr_comparison.i: src/lqr_comparison.cpp.i
+src/main.i: src/main.cpp.i
 
-.PHONY : src/lqr_comparison.i
+.PHONY : src/main.i
 
 # target to preprocess a source file
-src/lqr_comparison.cpp.i:
-	$(MAKE) -f CMakeFiles/lqr_comparison.dir/build.make CMakeFiles/lqr_comparison.dir/src/lqr_comparison.cpp.i
-.PHONY : src/lqr_comparison.cpp.i
+src/main.cpp.i:
+	$(MAKE) -f CMakeFiles/main_node.dir/build.make CMakeFiles/main_node.dir/src/main.cpp.i
+.PHONY : src/main.cpp.i
 
-src/lqr_comparison.s: src/lqr_comparison.cpp.s
+src/main.s: src/main.cpp.s
 
-.PHONY : src/lqr_comparison.s
+.PHONY : src/main.s
 
 # target to generate assembly for a file
-src/lqr_comparison.cpp.s:
-	$(MAKE) -f CMakeFiles/lqr_comparison.dir/build.make CMakeFiles/lqr_comparison.dir/src/lqr_comparison.cpp.s
-.PHONY : src/lqr_comparison.cpp.s
+src/main.cpp.s:
+	$(MAKE) -f CMakeFiles/main_node.dir/build.make CMakeFiles/main_node.dir/src/main.cpp.s
+.PHONY : src/main.cpp.s
 
-src/network_utils.o: src/network_utils.cpp.o
+src/network.o: src/network.cpp.o
 
-.PHONY : src/network_utils.o
+.PHONY : src/network.o
 
 # target to build an object file
-src/network_utils.cpp.o:
-	$(MAKE) -f CMakeFiles/lqr_comparison.dir/build.make CMakeFiles/lqr_comparison.dir/src/network_utils.cpp.o
-.PHONY : src/network_utils.cpp.o
+src/network.cpp.o:
+	$(MAKE) -f CMakeFiles/main_node.dir/build.make CMakeFiles/main_node.dir/src/network.cpp.o
+.PHONY : src/network.cpp.o
 
-src/network_utils.i: src/network_utils.cpp.i
+src/network.i: src/network.cpp.i
 
-.PHONY : src/network_utils.i
+.PHONY : src/network.i
 
 # target to preprocess a source file
-src/network_utils.cpp.i:
-	$(MAKE) -f CMakeFiles/lqr_comparison.dir/build.make CMakeFiles/lqr_comparison.dir/src/network_utils.cpp.i
-.PHONY : src/network_utils.cpp.i
+src/network.cpp.i:
+	$(MAKE) -f CMakeFiles/main_node.dir/build.make CMakeFiles/main_node.dir/src/network.cpp.i
+.PHONY : src/network.cpp.i
 
-src/network_utils.s: src/network_utils.cpp.s
+src/network.s: src/network.cpp.s
 
-.PHONY : src/network_utils.s
+.PHONY : src/network.s
 
 # target to generate assembly for a file
-src/network_utils.cpp.s:
-	$(MAKE) -f CMakeFiles/lqr_comparison.dir/build.make CMakeFiles/lqr_comparison.dir/src/network_utils.cpp.s
-.PHONY : src/network_utils.cpp.s
+src/network.cpp.s:
+	$(MAKE) -f CMakeFiles/main_node.dir/build.make CMakeFiles/main_node.dir/src/network.cpp.s
+.PHONY : src/network.cpp.s
+
+src/simulator.o: src/simulator.cpp.o
+
+.PHONY : src/simulator.o
+
+# target to build an object file
+src/simulator.cpp.o:
+	$(MAKE) -f CMakeFiles/main_node.dir/build.make CMakeFiles/main_node.dir/src/simulator.cpp.o
+.PHONY : src/simulator.cpp.o
+
+src/simulator.i: src/simulator.cpp.i
+
+.PHONY : src/simulator.i
+
+# target to preprocess a source file
+src/simulator.cpp.i:
+	$(MAKE) -f CMakeFiles/main_node.dir/build.make CMakeFiles/main_node.dir/src/simulator.cpp.i
+.PHONY : src/simulator.cpp.i
+
+src/simulator.s: src/simulator.cpp.s
+
+.PHONY : src/simulator.s
+
+# target to generate assembly for a file
+src/simulator.cpp.s:
+	$(MAKE) -f CMakeFiles/main_node.dir/build.make CMakeFiles/main_node.dir/src/simulator.cpp.s
+.PHONY : src/simulator.cpp.s
 
 # Help Target
 help:
@@ -211,17 +211,17 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... rebuild_cache"
-	@echo "... lqr_comparison"
+	@echo "... main_node"
 	@echo "... edit_cache"
-	@echo "... src/lqr.o"
-	@echo "... src/lqr.i"
-	@echo "... src/lqr.s"
-	@echo "... src/lqr_comparison.o"
-	@echo "... src/lqr_comparison.i"
-	@echo "... src/lqr_comparison.s"
-	@echo "... src/network_utils.o"
-	@echo "... src/network_utils.i"
-	@echo "... src/network_utils.s"
+	@echo "... src/main.o"
+	@echo "... src/main.i"
+	@echo "... src/main.s"
+	@echo "... src/network.o"
+	@echo "... src/network.i"
+	@echo "... src/network.s"
+	@echo "... src/simulator.o"
+	@echo "... src/simulator.i"
+	@echo "... src/simulator.s"
 .PHONY : help
 
 
