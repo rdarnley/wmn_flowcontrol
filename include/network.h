@@ -68,6 +68,8 @@ class WirelessNode{
         bool controllable;
         float distance_to_sink;
         std::vector<int> neighbor_ids;
+        std::vector<int> eligible_neighbor_ids;
+        std::vector<int> all_potential_ids;
 
         gtsam::GaussianFactorGraph graph;
 

@@ -49,10 +49,11 @@ int main(const int argc, const char* argv[]){
     DecentralizedSimulator sim;
 
     // Begin Sim
-    // Choose First Node
-    sim.ForwardPass(env, network, 3, -1);
+    std::vector<int> visited_nodes;
+    sim.ForwardPass(env, network, 3, -1, visited_nodes);
     
     // // Print Results Terminal
     // PrintResultTerminal(outputs);
+    sim.OutputFile(env, network);
 
 }

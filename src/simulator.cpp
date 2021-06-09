@@ -2,7 +2,36 @@
 
 #include "simulator.h"
 
-void DecentralizedSimulator::ForwardPass(Environment env, WirelessNetwork& network, int curr_id, int last_id){
+int DecentralizedSimulator::NodeSelector(WirelessNetwork& network, int current_id, bool forward, std::vector<int>& visited_nodes){
+
+    // Get Current Node
+    WirelessNode curr_node = network.map_of_nodes[current_id];
+    int next_id;
+
+    // Get One of Eligible Neighbors
+    if (forward){
+        return curr_node.all_potential_ids[0];
+    } else {
+        auto it = find(visited_nodes.begin(), visited_nodes.end(), current_id);
+        // Find index of current id in vector of nodes visited
+        if(it != visited_nodes.end()){
+            int index = it - visited_nodes.begin();
+            next_id = visited_nodes[index-1];
+        } else {
+            std::cout << "Problem" << std::endl;
+            next_id == -1;
+        }
+        
+        // Choose element right before
+        return next_id;
+    }
+
+} // end NodeSelector()
+
+void DecentralizedSimulator::ForwardPass(Environment env, WirelessNetwork& network, int curr_id, int last_id, std::vector<int>& visited_nodes){
+
+    // Add Current Id To Vector Of Visited Nodes
+    visited_nodes.push_back(curr_id);
 
     // Create Local Factor Graph
     this->CreateLocalFg(env, network, curr_id, last_id);
@@ -28,12 +57,15 @@ void DecentralizedSimulator::ForwardPass(Environment env, WirelessNetwork& netwo
 
     if(last){
         std::cout << "Done" << std::endl;
-        this->BackwardPass(env, network, curr_id, -1);
+        std::cout << "Current ID" << curr_id << std::endl;
+        this->BackwardPass(env, network, curr_id, -1, visited_nodes);
         return;
     } else {
         // Propagation Environment
         // Identity NExt node
-        this->ForwardPass(env, network, curr_id-1, curr_id);
+        int next_node_id = this->NodeSelector(network, curr_id, true, visited_nodes);
+        // this->ForwardPass(env, network, curr_id-1, curr_id);
+        this->ForwardPass(env, network, next_node_id, curr_id, visited_nodes);
     }
 
     return;
@@ -42,7 +74,7 @@ void DecentralizedSimulator::ForwardPass(Environment env, WirelessNetwork& netwo
 
 
 
-void DecentralizedSimulator::BackwardPass(Environment env, WirelessNetwork& network, int curr_id, int last_id){
+void DecentralizedSimulator::BackwardPass(Environment env, WirelessNetwork& network, int curr_id, int last_id, std::vector<int>& visited_nodes){
 
     this->SolveLocalBayesNet(env, network, curr_id, last_id);
 
@@ -68,7 +100,9 @@ void DecentralizedSimulator::BackwardPass(Environment env, WirelessNetwork& netw
     } else {
         // Add propagation environment
         // Identify next node
-        this->BackwardPass(env, network, curr_id+1, curr_id);
+        int next_node_id = this->NodeSelector(network, curr_id, false, visited_nodes);
+        // this->BackwardPass(env, network, curr_id+1, curr_id);
+        this->BackwardPass(env, network, next_node_id, curr_id, visited_nodes);
     }
 
     return;
@@ -97,7 +131,12 @@ void DecentralizedSimulator::CreateLocalFg(Environment env, WirelessNetwork& net
     int state_space = 2;
 
     // Start and Goal States
-    gtsam::Vector prior_state = gtsam::Vector(state_space); prior_state << env.queue_init, env.rate_init;
+    gtsam::Vector prior_state = gtsam::Vector(state_space);
+    if(curr_id == 1){
+        prior_state << env.queue_init, env.rate_init;
+    } else {
+        prior_state << 0, 0;
+    }
     gtsam::Vector final_state = gtsam::Vector(state_space); final_state << env.queue_final, env.rate_final; 
 
     // Noise Models
@@ -122,6 +161,8 @@ void DecentralizedSimulator::CreateLocalFg(Environment env, WirelessNetwork& net
     // Initialize Keys
     std::map<int, vector<gtsam::Key>> X;
     std::map<int, vector<gtsam::Key>> U;
+    std::vector<int> eligible_neighbor_ids;
+    std::vector<int> all_potential_ids;
 
     // Create State Keys For Neighbor Nodes
     for(int idx : neighbor_nodes){
@@ -129,6 +170,8 @@ void DecentralizedSimulator::CreateLocalFg(Environment env, WirelessNetwork& net
             for(int i1=0; i1<env.num_timesteps-1; i1++){
                 X[idx].push_back(gtsam::LabeledSymbol('x', idx, i1));
             }
+            eligible_neighbor_ids.push_back(idx);
+            all_potential_ids.push_back(idx);
         }
     }
 
@@ -157,9 +200,32 @@ void DecentralizedSimulator::CreateLocalFg(Environment env, WirelessNetwork& net
     }
 
     // Add Shared Factor From prev_node (If Applicable)
-    if(prev_node.id != -1){
-        // std::cout << "Hello" << std::endl;
-        graph.add(prev_node.shared_factor);
+    if(last_id != -1){
+
+        std::cout << "Keys" << std::endl;
+
+        boost::shared_ptr<gtsam::GaussianFactor> sh_factor;
+
+        sh_factor = prev_node.shared_factor;
+
+        gtsam::KeyVector sh_keys = sh_factor->keys();
+        sh_factor->printKeys();
+
+        // Add New Keys For Non-Neighbors If Necessary
+        for(int id : prev_node.eligible_neighbor_ids){
+
+            if(std::find(eligible_neighbor_ids.begin(), eligible_neighbor_ids.end(), id) != eligible_neighbor_ids.end()){
+                std::cout << "Found" << std::endl;
+            } else {
+                all_potential_ids.push_back(id);
+                for(int i1=0; i1<env.num_timesteps-1; i1++){
+                    X[id].push_back(gtsam::LabeledSymbol('x', id, i1));
+                }
+            }
+
+        }
+        
+        graph.add(sh_factor);
     }
 
     //
@@ -182,6 +248,43 @@ void DecentralizedSimulator::CreateLocalFg(Environment env, WirelessNetwork& net
                 terms.push_back(std::make_pair(X[idx][i1], a));
             } 
         }
+
+        ///// Add Inequality
+        // std::cout << "1" << std::endl;
+        double ineq = 200.0;
+        MatrixXd a_ineq = MatrixXd::Zero(1,2);  a_ineq << 1, 0;
+        gtsam::Key new_key = gtsam::LabeledSymbol('x', curr_id, i1+100);
+        gtsam::LinearInequality lin_ineq = gtsam::LinearInequality(X[curr_id][i1], a_ineq, ineq, new_key);
+        // graph.add(lin_ineq);
+        
+        X[curr_id].push_back(new_key);
+
+        ineq = -1.0;
+        a_ineq << -1, 0;
+        new_key = gtsam::LabeledSymbol('x', curr_id, i1+250);
+        gtsam::LinearInequality lin_ineq1 = gtsam::LinearInequality(X[curr_id][i1], a_ineq, ineq, new_key);
+        // graph.add(lin_ineq1);
+
+        ineq = 25.0;
+        a_ineq << 0, 1;
+        new_key = gtsam::LabeledSymbol('x', curr_id, i1+200);
+        gtsam::LinearInequality lin_ineq2 = gtsam::LinearInequality(X[curr_id][i1], a_ineq, ineq, new_key);
+        graph.add(lin_ineq2);
+
+        X[curr_id].push_back(new_key);
+
+
+        ineq = -10.0;
+        a_ineq << 0, -1;
+        new_key = gtsam::LabeledSymbol('x', curr_id, i1+300);
+        gtsam::LinearInequality lin_ineq3 = gtsam::LinearInequality(X[curr_id][i1], a_ineq, ineq, new_key);
+        graph.add(lin_ineq3);
+
+        X[curr_id].push_back(new_key);
+
+
+        // std::cout << "2" << std::endl;
+        /////
 
         // Add Isolated Dynamics Term
         terms.push_back(std::make_pair(X[curr_id][i1], a_end));
@@ -226,6 +329,8 @@ void DecentralizedSimulator::CreateLocalFg(Environment env, WirelessNetwork& net
     network.map_of_nodes[curr_id].graph = graph;
     network.map_of_nodes[curr_id].X = X;
     network.map_of_nodes[curr_id].U = U;
+    network.map_of_nodes[curr_id].eligible_neighbor_ids = eligible_neighbor_ids;
+    network.map_of_nodes[curr_id].all_potential_ids = all_potential_ids;
 
     return;
 
@@ -319,6 +424,9 @@ void DecentralizedSimulator::SolveLocalBayesNet(Environment env, WirelessNetwork
     std::cout << "ddkdkd" << std::endl;
     msg_bayes.print();
 
+    std::cout << "-----------" << std::endl;
+    bayes_sol.print();
+
     // Copy Values To Other Entitties
     network.map_of_nodes[curr_id].msg_bayes = msg_bayes;
     network.map_of_nodes[curr_id].bayes_sol = bayes_sol;
@@ -366,3 +474,41 @@ void DecentralizedSimulator::DisplayResults(Environment env, WirelessNetwork& ne
 
     return;
 }
+
+void DecentralizedSimulator::OutputFile(Environment env, WirelessNetwork& network){
+
+    ofstream outdata;
+
+    outdata.open("output.txt");
+
+    for(auto &x : network.map_of_nodes){
+
+        outdata << "Node " << x.first << std::endl;
+
+        for(int i1=0; i1<env.num_timesteps-1; i1++){
+
+            outdata << x.second.bayes_sol.at(x.second.U[x.first][i1])(0) << std::endl;
+
+        }
+
+    }
+
+    outdata << "States" << std::endl;
+
+    for(auto &x : network.map_of_nodes){
+
+        outdata << "Node " << x.first << std::endl;
+
+        for(int i1=0; i1<env.num_timesteps; i1++){
+
+            outdata << x.second.bayes_sol.at(x.second.X[x.first][i1])(0) << " " << 
+            x.second.bayes_sol.at(x.second.X[x.first][i1])(1) << std::endl;
+
+        }
+    }
+
+    // std::cout << network.map_of_nodes[2].bayes_sol.at(network.map_of_nodes[2].X[2][301])(0) << std::endl;
+
+    return;
+
+} // end OutputFile()

@@ -72,6 +72,7 @@
         "typeinfo": "cpp",
         "valarray": "cpp",
         "mixinvector": "cpp",
-        "containers": "cpp"
+        "containers": "cpp",
+        "any": "cpp"
     }
 }

@@ -5,6 +5,7 @@
 
 #include <yaml-cpp/yaml.h>
 #include <iostream>
+#include <fstream>
 
 #include <utility>
 #include <vector>
@@ -87,13 +88,14 @@ class DecentralizedSimulator{
         DecentralizedSimulator(){};
 
         // Functions
-        // void NodeSelector(std::map<int, WirelessNode> &map_of_nodes);
-        void ForwardPass(Environment env, WirelessNetwork& network, int current_id, int last_id);
-        void BackwardPass(Environment env, WirelessNetwork& network, int current_id, int last_id);
+        int NodeSelector(WirelessNetwork& network, int current_id, bool forward, std::vector<int>& visited_nodes);
+        void ForwardPass(Environment env, WirelessNetwork& network, int current_id, int last_id, std::vector<int>& visited_nodes);
+        void BackwardPass(Environment env, WirelessNetwork& network, int current_id, int last_id, std::vector<int>& visited_nodes);
         void CreateLocalFg(Environment env, WirelessNetwork& network, int current_id, int last_id);
         void ConvertLocalFg(Environment env, WirelessNetwork& network, int current_id, int last_id);
         void SolveLocalBayesNet(Environment env, WirelessNetwork& network, int current_id, int last_id);
         void DisplayResults(Environment env, WirelessNetwork& network);
+        void OutputFile(Environment env, WirelessNetwork& network);
 
     private:
 
